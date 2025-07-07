@@ -139,7 +139,7 @@ export default function RootLayout({
                   <h3 className="text-xl font-bold">999房屋網</h3>
                 </div>
                 <p className="text-white/70 leading-relaxed">
-                  採用莫蘭迪色彩美學設計，提供最優雅舒適的房屋瀏覽體驗。讓您在尋找理想住所的過程中，享受視覺與心靈的雙重愉悅。
+                  精選優質房屋，提供最優雅舒適的房屋瀏覽體驗。讓您在尋找理想住所的過程中，享受視覺與心靈的雙重愉悅。
                 </p>
               </div>
               <div>
