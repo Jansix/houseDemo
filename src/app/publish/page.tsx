@@ -312,18 +312,31 @@ export default function PublishPage() {
                   handleInputChange('city', e.target.value)
                   handleInputChange('district', '') // 重置區域
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
+                style={{
+                  backgroundColor: 'white',
+                  color: '#111827',
+                  appearance: 'menulist',
+                }}
                 required
               >
                 <option value="">請選擇縣市</option>
                 {Array.isArray(cities) && cities.length > 0 ? (
                   cities.map((city: string) => (
-                    <option key={city} value={city}>
+                    <option
+                      key={city}
+                      value={city}
+                      style={{ color: '#111827', backgroundColor: 'white' }}
+                    >
                       {city}
                     </option>
                   ))
                 ) : (
-                  <option value="" disabled>
+                  <option
+                    value=""
+                    disabled
+                    style={{ color: '#6b7280', backgroundColor: 'white' }}
+                  >
                     載入中...
                   </option>
                 )}
@@ -338,14 +351,23 @@ export default function PublishPage() {
               <select
                 value={formData.district}
                 onChange={(e) => handleInputChange('district', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
+                style={{
+                  backgroundColor: formData.city ? 'white' : '#f3f4f6',
+                  color: formData.city ? '#111827' : '#6b7280',
+                  appearance: 'menulist',
+                }}
                 disabled={!formData.city}
                 required
               >
                 <option value="">請選擇區域</option>
                 {formData.city
                   ? getDistricts(formData.city).map((district: string) => (
-                      <option key={district} value={district}>
+                      <option
+                        key={district}
+                        value={district}
+                        style={{ color: '#111827', backgroundColor: 'white' }}
+                      >
                         {district}
                       </option>
                     ))
@@ -414,10 +436,19 @@ export default function PublishPage() {
                 onChange={(e) =>
                   handleInputChange('rooms', Number(e.target.value))
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
+                style={{
+                  backgroundColor: 'white',
+                  color: '#111827',
+                  appearance: 'menulist',
+                }}
               >
                 {[1, 2, 3, 4, 5].map((num) => (
-                  <option key={num} value={num}>
+                  <option
+                    key={num}
+                    value={num}
+                    style={{ color: '#111827', backgroundColor: 'white' }}
+                  >
                     {num}房
                   </option>
                 ))}

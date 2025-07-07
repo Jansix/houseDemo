@@ -90,17 +90,30 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
           <select
             value={filters.city}
             onChange={(e) => handleFilterChange('city', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
+            style={{
+              backgroundColor: 'white',
+              color: '#111827',
+              appearance: 'menulist',
+            }}
           >
             <option value="">請選擇城市</option>
             {Array.isArray(cities) && cities.length > 0 ? (
               cities.map((city) => (
-                <option key={city} value={city}>
+                <option
+                  key={city}
+                  value={city}
+                  style={{ color: '#111827', backgroundColor: 'white' }}
+                >
                   {city}
                 </option>
               ))
             ) : (
-              <option value="" disabled>
+              <option
+                value=""
+                disabled
+                style={{ color: '#6b7280', backgroundColor: 'white' }}
+              >
                 載入中...
               </option>
             )}
@@ -115,12 +128,21 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
             value={filters.district}
             onChange={(e) => handleFilterChange('district', e.target.value)}
             disabled={!filters.city}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 bg-white text-gray-900"
+            style={{
+              backgroundColor: filters.city ? 'white' : '#f3f4f6',
+              color: filters.city ? '#111827' : '#6b7280',
+              appearance: 'menulist',
+            }}
           >
             <option value="">請選擇區域</option>
             {filters.city
               ? getDistrictsByCity(filters.city).map((district: string) => (
-                  <option key={district} value={district}>
+                  <option
+                    key={district}
+                    value={district}
+                    style={{ color: '#111827', backgroundColor: 'white' }}
+                  >
                     {district}
                   </option>
                 ))
