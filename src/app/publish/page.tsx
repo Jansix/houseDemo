@@ -160,7 +160,7 @@ export default function PublishPage() {
       const newHouse: House = {
         id: Date.now().toString(), // 使用時間戳作為臨時 ID
         title: formData.title,
-        price: formData.price * 10000, // 將萬元轉換為元
+        price: formData.price, // 將萬元轉換為元
         address: `${formData.city}${formData.district}${formData.address}`,
         area: formData.area,
         rooms: formData.rooms,
