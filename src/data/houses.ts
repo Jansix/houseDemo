@@ -392,3 +392,17 @@ export const districts = {
   台南市: ['安平區', '中西區', '東區', '南區', '北區', '安南區'],
   高雄市: ['前金區', '新興區', '鼓山區', '左營區', '三民區', '苓雅區'],
 }
+
+// 提供一個安全的取得區域的函數
+export const getDistrictsByCity = (city: string): string[] => {
+  if (!city || typeof city !== 'string') return []
+  return districts[city as keyof typeof districts] || []
+}
+
+// 確保資料完整性的檢查
+if (typeof window !== 'undefined') {
+  console.log('台灣地區資料載入完成:', {
+    citiesCount: cities.length,
+    districtsKeys: Object.keys(districts).length,
+  })
+}

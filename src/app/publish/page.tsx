@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { House } from '@/data/houses'
-import { useTwCitySelector } from '@/hooks/useTwCitySelector'
+import { House, cities, districts, getDistrictsByCity } from '@/data/houses'
 import dynamic from 'next/dynamic'
 
 // 動態載入富文本編輯器，避免 SSR 問題
@@ -48,7 +47,11 @@ interface PublishFormData {
 
 export default function PublishPage() {
   const router = useRouter()
-  const { cities, getDistricts } = useTwCitySelector()
+
+  // 取得地區資料的函數
+  const getDistricts = (city: string): string[] => {
+    return getDistrictsByCity(city)
+  }
 
   const [formData, setFormData] = useState<PublishFormData>({
     title: '',
@@ -313,11 +316,17 @@ export default function PublishPage() {
                 required
               >
                 <option value="">請選擇縣市</option>
-                {cities.map((city: string) => (
-                  <option key={city} value={city}>
-                    {city}
+                {Array.isArray(cities) && cities.length > 0 ? (
+                  cities.map((city: string) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    載入中...
                   </option>
-                ))}
+                )}
               </select>
             </div>
 
@@ -334,12 +343,13 @@ export default function PublishPage() {
                 required
               >
                 <option value="">請選擇區域</option>
-                {formData.city &&
-                  getDistricts(formData.city).map((district: string) => (
-                    <option key={district} value={district}>
-                      {district}
-                    </option>
-                  ))}
+                {formData.city
+                  ? getDistricts(formData.city).map((district: string) => (
+                      <option key={district} value={district}>
+                        {district}
+                      </option>
+                    ))
+                  : null}
               </select>
             </div>
 

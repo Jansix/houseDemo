@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { cities, districts } from '@/data/houses'
+import { cities, getDistrictsByCity } from '@/data/houses'
 
 interface SearchFiltersProps {
   onSearch: (filters: SearchFilters) => void
@@ -93,11 +93,17 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="">請選擇城市</option>
-            {cities.map((city) => (
-              <option key={city} value={city}>
-                {city}
+            {Array.isArray(cities) && cities.length > 0 ? (
+              cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>
+                載入中...
               </option>
-            ))}
+            )}
           </select>
         </div>
 
@@ -112,14 +118,13 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
           >
             <option value="">請選擇區域</option>
-            {filters.city &&
-              districts[filters.city as keyof typeof districts]?.map(
-                (district) => (
+            {filters.city
+              ? getDistrictsByCity(filters.city).map((district: string) => (
                   <option key={district} value={district}>
                     {district}
                   </option>
-                )
-              )}
+                ))
+              : null}
           </select>
         </div>
       </div>
