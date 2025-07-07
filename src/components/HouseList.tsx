@@ -18,8 +18,23 @@ function HouseCard({ house }: HouseCardProps) {
     <Link href={`/houses/${house.id}`} className="block">
       <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
         {/* 圖片區域 */}
-        <div className="relative h-48 bg-gray-200">
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+        <div className="relative h-48 bg-gray-200 overflow-hidden">
+          <img
+            src={house.images[0]}
+            alt={house.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // 如果圖片載入失敗，隱藏圖片並顯示備用內容
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              const fallback = target.nextElementSibling as HTMLElement
+              if (fallback) fallback.style.display = 'flex'
+            }}
+          />
+          <div
+            className="absolute inset-0 flex items-center justify-center text-gray-500"
+            style={{ display: 'none' }}
+          >
             <span>房屋圖片</span>
           </div>
           {/* 價格標籤 */}

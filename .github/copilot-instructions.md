@@ -1,10 +1,10 @@
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
 
-# 591 房屋網 Demo - Copilot 指南
+# 999 房屋網 Demo - Copilot 指南
 
 ## 專案概述
 
-這是一個仿 591 房屋網的 demo 專案，主要功能包括房屋列表展示、搜尋篩選、房屋詳情和發佈房屋。
+這是一個仿 999 房屋網的 demo 專案，主要功能包括房屋列表展示、搜尋篩選、房屋詳情和發佈房屋。
 
 ## 技術棧
 
