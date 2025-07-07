@@ -92,54 +92,105 @@ export default function HomePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* 頁面標題 */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">買房找999 🏠</h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
-          精選優質房屋，使用進階篩選功能找到最適合您的房屋
-        </p>
-        <Link
-          href="/publish"
-          className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-200 font-medium"
-        >
-          + 免費刊登房屋
-        </Link>
-      </div>
+    <div className="min-h-screen">
+      {/* 英雄區塊 */}
+      <section className="relative morandi-gradient-bg pt-12 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 morandi-fade-in">
+            <h1 className="text-5xl md:text-6xl font-bold morandi-text-primary mb-6 leading-tight">
+              尋找您的
+              <span className="bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
+                理想居所
+              </span>
+            </h1>
+            <p className="text-xl morandi-text-secondary max-w-3xl mx-auto leading-relaxed mb-8">
+              精選優質房屋，使用進階篩選功能找到最適合您的房屋
+            </p>
+            <Link
+              href="/publish"
+              className="morandi-button-accent inline-flex items-center space-x-2"
+            >
+              <span>✨</span>
+              <span>免費刊登房屋</span>
+            </Link>
+            <div className="mt-8 flex justify-center">
+              <div className="flex items-center space-x-8 text-sm morandi-text-muted">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-primary-400 rounded-full"></div>
+                  <span>專業房仲</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-secondary-400 rounded-full"></div>
+                  <span>實價登錄</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-accent-400 rounded-full"></div>
+                  <span>安心交易</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 搜尋區域 */}
+          <div className="max-w-5xl mx-auto morandi-fade-in">
+            <SearchFilters onSearch={handleSearch} />
+          </div>
+        </div>
+      </section>
 
       {/* 統計資訊 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-primary-600">
-            {allHouses.length}
+      <section className="py-16 bg-white/60 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="text-center morandi-fade-in">
+              <div className="text-4xl font-bold text-primary-600 mb-2">
+                {allHouses.length}
+              </div>
+              <div className="morandi-text-secondary font-medium">總物件數</div>
+            </div>
+            <div className="text-center morandi-fade-in">
+              <div className="text-4xl font-bold text-secondary-600 mb-2">
+                {allHouses.filter((h) => h.type === 'apartment').length}
+              </div>
+              <div className="morandi-text-secondary font-medium">公寓</div>
+            </div>
+            <div className="text-center morandi-fade-in">
+              <div className="text-4xl font-bold text-accent-600 mb-2">
+                {allHouses.filter((h) => h.type === 'house').length}
+              </div>
+              <div className="morandi-text-secondary font-medium">透天厝</div>
+            </div>
+            <div className="text-center morandi-fade-in">
+              <div className="text-4xl font-bold text-primary-600 mb-2">
+                {allHouses.filter((h) => h.type === 'villa').length}
+              </div>
+              <div className="morandi-text-secondary font-medium">別墅</div>
+            </div>
           </div>
-          <div className="text-sm text-gray-600">總物件數</div>
         </div>
-        <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-primary-600">
-            {allHouses.filter((h) => h.type === 'apartment').length}
-          </div>
-          <div className="text-sm text-gray-600">公寓</div>
-        </div>
-        <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-primary-600">
-            {allHouses.filter((h) => h.type === 'house').length}
-          </div>
-          <div className="text-sm text-gray-600">透天厝</div>
-        </div>
-        <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-primary-600">
-            {allHouses.filter((h) => h.type === 'villa').length}
-          </div>
-          <div className="text-sm text-gray-600">別墅</div>
-        </div>
-      </div>
-
-      {/* 搜尋篩選器 */}
-      <SearchFilters onSearch={handleSearch} />
+      </section>
 
       {/* 房屋列表 */}
-      <HouseList houses={filteredHouses} loading={loading} />
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl font-bold morandi-text-primary mb-2">
+                精選物件
+              </h2>
+              <p className="morandi-text-secondary">
+                找到{' '}
+                <span className="font-semibold text-accent-600">
+                  {filteredHouses.length}
+                </span>{' '}
+                個符合條件的物件
+              </p>
+            </div>
+          </div>
+
+          <HouseList houses={filteredHouses} loading={loading} />
+        </div>
+      </section>
     </div>
   )
 }

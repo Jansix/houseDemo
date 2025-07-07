@@ -15,14 +15,14 @@ function HouseCard({ house }: HouseCardProps) {
   }
 
   return (
-    <Link href={`/houses/${house.id}`} className="block">
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+    <Link href={`/houses/${house.id}`} className="block group">
+      <div className="morandi-card-hover overflow-hidden transform group-hover:scale-105 transition-all duration-500">
         {/* 圖片區域 */}
-        <div className="relative h-48 bg-gray-200 overflow-hidden">
+        <div className="relative h-64 bg-background-100 overflow-hidden">
           <img
             src={house.images[0]}
             alt={house.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             onError={(e) => {
               // 如果圖片載入失敗，隱藏圖片並顯示備用內容
               const target = e.target as HTMLImageElement
@@ -32,59 +32,94 @@ function HouseCard({ house }: HouseCardProps) {
             }}
           />
           <div
-            className="absolute inset-0 flex items-center justify-center text-gray-500"
+            className="absolute inset-0 flex items-center justify-center morandi-text-muted bg-background-50"
             style={{ display: 'none' }}
           >
-            <span>房屋圖片</span>
+            <div className="text-center">
+              <div className="text-4xl mb-2">🏠</div>
+              <span>房屋圖片</span>
+            </div>
           </div>
+
           {/* 價格標籤 */}
-          <div className="absolute top-3 right-3 bg-primary-600 text-white px-3 py-1 rounded-full font-bold">
-            {house.price}萬
-          </div>
-        </div>
-
-        {/* 內容區域 */}
-        <div className="p-4">
-          <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
-            {house.title}
-          </h3>
-
-          <p className="text-gray-600 text-sm mb-3">📍 {house.address}</p>
-
-          {/* 房屋資訊 */}
-          <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-            <span className="flex items-center gap-1">
-              🏠 {house.rooms}房{house.bathrooms}衛
-            </span>
-            <span className="flex items-center gap-1">📐 {house.area}坪</span>
-            <span className="flex items-center gap-1">🏢 {house.floor}</span>
+          <div className="absolute top-4 right-4">
+            <div className="bg-accent-500 text-white px-4 py-2 rounded-xl font-bold shadow-soft">
+              {house.price.toLocaleString()}萬
+            </div>
           </div>
 
-          {/* 物件類型 */}
-          <div className="flex items-center justify-between">
-            <span className="inline-block bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+          {/* 物件類型標籤 */}
+          <div className="absolute top-4 left-4">
+            <div className="bg-white/90 backdrop-blur-sm morandi-text-primary px-3 py-1 rounded-lg text-sm font-medium">
               {typeMap[house.type]}
-            </span>
-            <span className="text-xs text-gray-500">
-              {new Date(house.postedDate).toLocaleDateString('zh-TW')}
-            </span>
+            </div>
           </div>
 
           {/* 特色標籤 */}
-          <div className="flex flex-wrap gap-1 mt-3">
-            {house.features.slice(0, 3).map((feature, index) => (
-              <span
-                key={index}
-                className="inline-block bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs"
-              >
-                {feature}
+          {house.features.length > 0 && (
+            <div className="absolute bottom-4 left-4 right-4">
+              <div className="flex flex-wrap gap-2">
+                {house.features.slice(0, 2).map((feature, index) => (
+                  <span key={index} className="morandi-badge text-xs">
+                    ✓ {feature}
+                  </span>
+                ))}
+                {house.features.length > 2 && (
+                  <span className="morandi-badge text-xs">
+                    +{house.features.length - 2}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 內容區域 */}
+        <div className="p-6">
+          <h3 className="text-xl font-bold morandi-text-primary mb-3 line-clamp-2 group-hover:text-primary-600 transition-colors duration-300">
+            {house.title}
+          </h3>
+
+          <div className="flex items-center gap-1 morandi-text-secondary mb-4">
+            <span className="text-primary-500">📍</span>
+            <span className="text-sm line-clamp-1">{house.address}</span>
+          </div>
+
+          {/* 房屋資訊 */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="text-center">
+              <div className="text-lg font-bold morandi-text-primary">
+                {house.rooms}房{house.bathrooms}衛
+              </div>
+              <div className="text-xs morandi-text-muted">格局</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold morandi-text-primary">
+                {house.area}坪
+              </div>
+              <div className="text-xs morandi-text-muted">坪數</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold morandi-text-primary">
+                {house.floor}
+              </div>
+              <div className="text-xs morandi-text-muted">樓層</div>
+            </div>
+          </div>
+
+          {/* 底部資訊 */}
+          <div className="flex items-center justify-between pt-4 border-t border-background-200">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-primary-400 rounded-full"></div>
+              <span className="text-sm morandi-text-secondary">
+                {new Date(house.postedDate).toLocaleDateString('zh-TW')}
               </span>
-            ))}
-            {house.features.length > 3 && (
-              <span className="text-xs text-gray-500">
-                +{house.features.length - 3}個特色
-              </span>
-            )}
+            </div>
+            <div className="text-sm font-medium text-accent-600">
+              單價{' '}
+              {Math.round((house.price * 10000) / house.area).toLocaleString()}
+              元/坪
+            </div>
           </div>
         </div>
       </div>
@@ -100,17 +135,19 @@ interface HouseListProps {
 export default function HouseList({ houses, loading = false }: HouseListProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {[...Array(6)].map((_, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
-          >
-            <div className="h-48 bg-gray-200 animate-pulse"></div>
-            <div className="p-4">
-              <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse mb-3"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3"></div>
+          <div key={index} className="morandi-card overflow-hidden">
+            <div className="h-64 bg-background-200 animate-pulse"></div>
+            <div className="p-6">
+              <div className="h-6 bg-background-200 rounded animate-pulse mb-3"></div>
+              <div className="h-4 bg-background-200 rounded animate-pulse mb-4"></div>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="h-12 bg-background-200 rounded animate-pulse"></div>
+                <div className="h-12 bg-background-200 rounded animate-pulse"></div>
+                <div className="h-12 bg-background-200 rounded animate-pulse"></div>
+              </div>
+              <div className="h-4 bg-background-200 rounded animate-pulse w-2/3"></div>
             </div>
           </div>
         ))}
@@ -120,35 +157,47 @@ export default function HouseList({ houses, loading = false }: HouseListProps) {
 
   if (houses.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-400 text-6xl mb-4">🏠</div>
-        <h3 className="text-xl font-medium text-gray-600 mb-2">
-          沒有找到符合條件的房屋
-        </h3>
-        <p className="text-gray-500">請調整搜尋條件或瀏覽其他房屋</p>
+      <div className="text-center py-16">
+        <div className="morandi-card max-w-md mx-auto p-12">
+          <div className="text-6xl mb-6">🏠</div>
+          <h3 className="text-2xl font-bold morandi-text-primary mb-3">
+            沒有找到符合條件的房屋
+          </h3>
+          <p className="morandi-text-secondary mb-6">
+            請調整搜尋條件或瀏覽其他房屋
+          </p>
+          <Link href="/publish" className="morandi-button-primary">
+            免費刊登房屋
+          </Link>
+        </div>
       </div>
     )
   }
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-800">
-          找到 {houses.length} 間房屋
-        </h2>
-        <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-          <option value="newest">最新刊登</option>
-          <option value="price-low">價格低到高</option>
-          <option value="price-high">價格高到低</option>
-          <option value="area-large">坪數大到小</option>
-        </select>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {houses.map((house) => (
-          <HouseCard key={house.id} house={house} />
+          <div key={house.id} className="morandi-fade-in">
+            <HouseCard house={house} />
+          </div>
         ))}
       </div>
+
+      {/* 分頁或載入更多按鈕 */}
+      {houses.length > 0 && (
+        <div className="text-center mt-12">
+          <p className="morandi-text-secondary mb-4">
+            已顯示 {houses.length} 個物件
+          </p>
+          <div className="flex justify-center space-x-4">
+            <button className="morandi-button-secondary">載入更多</button>
+            <Link href="/publish" className="morandi-button-accent">
+              ✨ 刊登您的房屋
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -2,28 +2,89 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 導入字體 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap');
+
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --morandi-primary: #6b7fa8;
+  --morandi-secondary: #ddb892;
+  --morandi-background: #f8f6f0;
+  --morandi-text: #3d5a80;
+  --morandi-accent: #ee6c4d;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+/* 基礎樣式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  font-family: 'Inter', 'Noto Sans TC', system-ui, sans-serif;
+  background-color: var(--morandi-background);
+  color: var(--morandi-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 莫蘭迪風格的全局組件樣式 */
+@layer components {
+  .morandi-card {
+    @apply bg-white/90 backdrop-blur-sm rounded-2xl shadow-soft border border-background-300/30;
+  }
+
+  .morandi-card-hover {
+    @apply morandi-card hover:shadow-soft-lg hover:border-primary-200/50 transition-all duration-300;
+  }
+
+  .morandi-input {
+    @apply w-full px-4 py-3 bg-white/80 border border-background-400/40 rounded-xl
+           focus:ring-2 focus:ring-primary-300/50 focus:border-primary-400/60
+           transition-all duration-300 placeholder:text-text-muted/60;
+  }
+
+  .morandi-button-primary {
+    @apply px-6 py-3 bg-primary-500 text-white rounded-xl font-medium
+           hover:bg-primary-600 hover:shadow-soft-lg
+           active:bg-primary-700 transition-all duration-300;
+  }
+
+  .morandi-button-secondary {
+    @apply px-6 py-3 bg-secondary-200/80 text-text-primary rounded-xl font-medium
+           hover:bg-secondary-300/80 hover:shadow-soft
+           transition-all duration-300;
+  }
+
+  .morandi-button-accent {
+    @apply px-6 py-3 bg-accent-500 text-white rounded-xl font-medium
+           hover:bg-accent-600 hover:shadow-soft-lg
+           active:bg-accent-700 transition-all duration-300;
+  }
+
+  .morandi-text-primary {
+    @apply text-text-primary;
+  }
+
+  .morandi-text-secondary {
+    @apply text-text-secondary;
+  }
+
+  .morandi-text-muted {
+    @apply text-text-muted;
+  }
+
+  .morandi-badge {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium
+           bg-primary-100/80 text-primary-700 border border-primary-200/50;
+  }
+
+  .morandi-badge-accent {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium
+           bg-accent-100/80 text-accent-700 border border-accent-200/50;
+  }
 }
 
 /* 文字截斷 */
@@ -41,9 +102,74 @@ body {
   -webkit-line-clamp: 2;
 }
 
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 /* 平滑滾動 */
 html {
   scroll-behavior: smooth;
+}
+
+/* 自定義滾動條 - 莫蘭迪風格 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--morandi-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--morandi-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--morandi-accent);
+}
+
+/* 選中文字的顏色 */
+::selection {
+  background-color: var(--morandi-primary);
+  color: white;
+}
+
+/* 載入動畫 - 莫蘭迪風格 */
+@keyframes morandi-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.morandi-fade-in {
+  animation: morandi-fade-in 0.6s ease-out;
+}
+
+/* 漸變背景 */
+.morandi-gradient-bg {
+  background: linear-gradient(
+    135deg,
+    var(--morandi-background) 0%,
+    rgba(248, 246, 240, 0.8) 50%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+}
+
+/* 毛玻璃效果 */
+.morandi-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* 自定義滾動條 */
