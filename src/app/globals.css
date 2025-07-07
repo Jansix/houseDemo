@@ -32,7 +32,6 @@ body {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
-  line-clamp: 1;
 }
 
 .line-clamp-2 {
@@ -40,7 +39,6 @@ body {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
 }
 
 /* 平滑滾動 */
@@ -64,48 +62,4 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
-}
-
-/* 修正 select 下拉選單樣式 */
-select {
-  background-color: white !important;
-  color: #111827 !important;
-  -webkit-appearance: menulist !important;
-  -moz-appearance: menulist !important;
-  appearance: menulist !important;
-}
-
-select option {
-  background-color: white !important;
-  color: #111827 !important;
-  padding: 8px 12px !important;
-}
-
-select:disabled {
-  background-color: #f3f4f6 !important;
-  color: #6b7280 !important;
-}
-
-select:disabled option {
-  background-color: #f3f4f6 !important;
-  color: #6b7280 !important;
-}
-
-/* 確保下拉選單的 z-index */
-select {
-  position: relative;
-  z-index: 10;
-}
-
-/* 修正特定瀏覽器的下拉選單問題 */
-@supports (-webkit-appearance: none) {
-  select {
-    -webkit-appearance: menulist !important;
-  }
-}
-
-@supports (-moz-appearance: none) {
-  select {
-    -moz-appearance: menulist !important;
-  }
 }

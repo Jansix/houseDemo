@@ -38,7 +38,7 @@ export default function RelatedHouses({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white text-gray-900 rounded-lg shadow-md p-6">
       <h2 className="text-xl font-bold text-gray-800 mb-6">相關推薦</h2>
 
       <div className="space-y-4">

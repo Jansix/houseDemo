@@ -16,7 +16,7 @@ function HouseCard({ house }: HouseCardProps) {
 
   return (
     <Link href={`/houses/${house.id}`} className="block">
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+      <div className="bg-white text-gray-900 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
         {/* 圖片區域 */}
         <div className="relative h-48 bg-gray-200 overflow-hidden">
           <img

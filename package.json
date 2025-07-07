@@ -12,7 +12,6 @@
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
-    "react-quill": "^2.0.0",
     "swiper": "^11.2.10",
     "tw-city-selector": "^2.1.2",
     "yet-another-react-lightbox": "^3.24.0"

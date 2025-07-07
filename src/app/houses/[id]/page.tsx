@@ -317,7 +317,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
           </div>
 
           {/* 房屋詳細資訊表格 */}
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="bg-white text-gray-900 rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">房屋資料</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div className="flex justify-between py-2 border-b border-gray-100">
@@ -358,7 +358,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
           </div>
 
           {/* 周邊機能 */}
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="bg-white text-gray-900 rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">周邊機能</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>

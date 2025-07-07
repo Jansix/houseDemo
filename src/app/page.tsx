@@ -109,25 +109,25 @@ export default function HomePage() {
 
       {/* 統計資訊 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+        <div className="bg-white text-gray-900 rounded-lg p-4 text-center shadow-sm">
           <div className="text-2xl font-bold text-primary-600">
             {allHouses.length}
           </div>
           <div className="text-sm text-gray-600">總物件數</div>
         </div>
-        <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+        <div className="bg-white text-gray-900 rounded-lg p-4 text-center shadow-sm">
           <div className="text-2xl font-bold text-primary-600">
             {allHouses.filter((h) => h.type === 'apartment').length}
           </div>
           <div className="text-sm text-gray-600">公寓</div>
         </div>
-        <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+        <div className="bg-white text-gray-900 rounded-lg p-4 text-center shadow-sm">
           <div className="text-2xl font-bold text-primary-600">
             {allHouses.filter((h) => h.type === 'house').length}
           </div>
           <div className="text-sm text-gray-600">透天厝</div>
         </div>
-        <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+        <div className="bg-white text-gray-900 rounded-lg p-4 text-center shadow-sm">
           <div className="text-2xl font-bold text-primary-600">
             {allHouses.filter((h) => h.type === 'villa').length}
           </div>
