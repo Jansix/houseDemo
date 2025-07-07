@@ -25,7 +25,10 @@ export default function RootLayout({
     <html lang="zh-TW">
       <head>
         <title>999 房屋買賣網 - Demo</title>
-        <meta name="description" content="買房就上999！提供台灣最完整的房屋買賣資訊" />
+        <meta
+          name="description"
+          content="買房就上999！提供台灣最完整的房屋買賣資訊"
+        />
       </head>
       <body className={inter.className}>
         <header className="bg-white shadow-md sticky top-0 z-50">
@@ -57,7 +60,7 @@ export default function RootLayout({
                 </a>
               </nav>
               <div className="md:hidden">
-                <button 
+                <button
                   className="text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
@@ -86,7 +89,7 @@ export default function RootLayout({
                 </button>
               </div>
             </div>
-            
+
             {/* 手機版選單 */}
             {mobileMenuOpen && (
               <div className="md:hidden border-t border-gray-200">
