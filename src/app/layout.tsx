@@ -135,7 +135,7 @@ export default function RootLayout({
               <div>
                 <h3 className="text-lg font-bold mb-4">999房屋網</h3>
                 <p className="text-gray-300">
-                  提供最完整的房屋買賣資訊，讓您輕鬆找到理想的家。
+                  精選優質房屋，提供最優雅舒適的房屋瀏覽體驗。讓您在尋找理想住所的過程中，享受視覺與心靈的雙重愉悅。
                 </p>
               </div>
               <div>
@@ -177,7 +177,7 @@ export default function RootLayout({
               </div>
             </div>
             <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-              <p>&copy; 2024 999房屋網 Demo. All rights reserved.</p>
+              <p>&copy; 2025 999房屋網 Demo. All rights reserved.</p>
             </div>
           </div>
         </footer>
