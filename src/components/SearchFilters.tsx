@@ -67,7 +67,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6 text-gray-900">
       <h2 className="text-xl font-bold text-gray-800 mb-4">搜尋條件</h2>
 
       {/* 關鍵字搜尋 */}

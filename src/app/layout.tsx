@@ -22,16 +22,20 @@ export default function RootLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <html lang="zh-TW">
+    <html lang="zh-TW" className="light" style={{ colorScheme: 'light' }}>
       <head>
         <title>999 房屋買賣網 - Demo</title>
         <meta
           name="description"
           content="買房就上999！提供台灣最完整的房屋買賣資訊"
         />
+        <meta name="color-scheme" content="light" />
       </head>
-      <body className={inter.className}>
-        <header className="bg-white shadow-md sticky top-0 z-50">
+      <body
+        className={`${inter.className} bg-gray-50 text-gray-900`}
+        style={{ colorScheme: 'light' }}
+      >
+        <header className="bg-white shadow-md sticky top-0 z-50 text-gray-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
@@ -121,7 +125,9 @@ export default function RootLayout({
           </div>
         </header>
 
-        <main className="min-h-screen bg-gray-50">{children}</main>
+        <main className="min-h-screen bg-gray-50 text-gray-900">
+          {children}
+        </main>
 
         <footer className="bg-gray-800 text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
