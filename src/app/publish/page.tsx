@@ -32,7 +32,6 @@ interface PublishFormData {
   decoration: string
   contactName: string
   contactPhone: string
-  images: File[]
   // 新增周邊機能欄位
   nearbyFacilities: {
     schools: string
@@ -71,7 +70,6 @@ export default function PublishPage() {
     decoration: '簡單裝潢',
     contactName: '',
     contactPhone: '',
-    images: [],
     nearbyFacilities: {
       schools: '',
       commercialAreas: '',
@@ -84,7 +82,7 @@ export default function PublishPage() {
     },
   })
 
-  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
+  const [imageBase64List, setImageBase64List] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // 處理基本欄位變更
@@ -102,37 +100,40 @@ export default function PublishPage() {
     }))
   }
 
+  // 將 File 轉換為 base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = (error) => reject(error)
+    })
+  }
+
   // 處理圖片上傳
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
 
-    if (files.length + formData.images.length > 8) {
+    if (files.length + imageBase64List.length > 8) {
       alert('最多只能上傳 8 張圖片')
       return
     }
 
-    // 建立預覽 URL
-    const newPreviewUrls = files.map((file) => URL.createObjectURL(file))
+    try {
+      // 將所有檔案轉換為 base64
+      const base64Promises = files.map((file) => fileToBase64(file))
+      const newBase64Images = await Promise.all(base64Promises)
 
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, ...files],
-    }))
-
-    setImagePreviewUrls((prev) => [...prev, ...newPreviewUrls])
+      setImageBase64List((prev) => [...prev, ...newBase64Images])
+    } catch (error) {
+      console.error('圖片轉換失敗:', error)
+      alert('圖片處理失敗，請重試')
+    }
   }
 
   // 移除圖片
   const removeImage = (index: number) => {
-    // 釋放 URL 記憶體
-    URL.revokeObjectURL(imagePreviewUrls[index])
-
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }))
-
-    setImagePreviewUrls((prev) => prev.filter((_, i) => i !== index))
+    setImageBase64List((prev) => prev.filter((_, i) => i !== index))
   }
 
   // 提交表單
@@ -168,8 +169,7 @@ export default function PublishPage() {
         floor: formData.floor,
         age: formData.age,
         type: formData.type,
-        images:
-          imagePreviewUrls.length > 0 ? imagePreviewUrls : ['/house1.png'], // 如果沒有上傳圖片，使用預設圖片
+        images: imageBase64List.length > 0 ? imageBase64List : ['/house1.png'], // 如果沒有上傳圖片，使用預設圖片
         description: formData.description,
         introduction: formData.introduction,
         postedDate: new Date().toISOString().split('T')[0],
@@ -813,12 +813,12 @@ export default function PublishPage() {
             </div>
 
             {/* 圖片預覽 */}
-            {imagePreviewUrls.length > 0 && (
+            {imageBase64List.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {imagePreviewUrls.map((url, index) => (
+                {imageBase64List.map((base64: string, index: number) => (
                   <div key={index} className="relative">
                     <img
-                      src={url}
+                      src={base64}
                       alt={`預覽 ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg border"
                     />
