@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { House } from '@/data/houses'
+import config from '@/data/config'
 
 interface HouseCardProps {
   house: House
@@ -38,7 +39,9 @@ function HouseCard({ house }: HouseCardProps) {
             <span>房屋圖片</span>
           </div>
           {/* 價格標籤 */}
-          <div className="absolute top-3 right-3 bg-primary-600 text-white px-3 py-1 rounded-full font-bold">
+          <div
+            className={`absolute top-3 right-3 bg-primary-600 text-white px-3 py-1 rounded-full font-bold`}
+          >
             {house.price}萬
           </div>
         </div>

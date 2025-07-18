@@ -1,7 +1,7 @@
 /* Swiper custom styles */
 .main-swiper {
-  --swiper-navigation-color: #f97316;
-  --swiper-pagination-color: #f97316;
+  --swiper-navigation-color: white;
+  --swiper-pagination-color: white;
 }
 
 .main-swiper .swiper-button-next,
@@ -21,7 +21,7 @@
 .main-swiper .swiper-pagination-bullet {
   width: 12px;
   height: 12px;
-  background: #f97316;
+  background: white;
   opacity: 0.5;
 }
 
@@ -36,6 +36,6 @@
 
 .thumbs-swiper .swiper-slide-thumb-active {
   opacity: 1;
-  border: 2px solid #f97316;
+  border: 2px solid white;
   border-radius: 4px;
 }

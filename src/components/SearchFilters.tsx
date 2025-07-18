@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { cities, districts } from '@/data/houses'
+import config from '@/data/config'
 
 interface SearchFiltersProps {
   onSearch: (filters: SearchFilters) => void
@@ -231,7 +232,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
       <div className="flex gap-4">
         <button
           onClick={handleSearch}
-          className="flex-1 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition duration-200 font-medium"
+          className={`flex-1 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition duration-200 font-medium`}
         >
           搜尋物件
         </button>

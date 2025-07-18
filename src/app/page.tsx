@@ -7,6 +7,7 @@ import SearchFilters, {
 } from '@/components/SearchFilters'
 import HouseList from '@/components/HouseList'
 import { houses, House } from '@/data/houses'
+import config from '@/data/config'
 
 export default function HomePage() {
   const [allHouses, setAllHouses] = useState<House[]>(houses)
@@ -95,13 +96,15 @@ export default function HomePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* 頁面標題 */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">買房找999 🏠</h1>
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          找房交給我們 🏠
+        </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
           精選優質房屋，使用進階篩選功能找到最適合您的房屋
         </p>
         <Link
           href="/publish"
-          className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-200 font-medium"
+          className={`inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-200 font-medium`}
         >
           + 免費刊登房屋
         </Link>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { houses, House } from '@/data/houses'
 import RelatedHouses from '@/components/RelatedHouses'
+import config from '@/data/config'
 
 // Swiper imports
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -81,7 +82,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
         <p className="text-gray-600 mb-6">您要查看的房屋可能已下架或不存在</p>
         <Link
           href="/"
-          className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-200"
+          className={`inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-200`}
         >
           返回首頁
         </Link>
@@ -130,7 +131,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
             : '5000萬以上'}
         </span>
         <span className="mx-2 text-gray-400">&gt;</span>
-        <span className="text-orange-600">{house.title}</span>
+        <span className="text-primary-600">{house.title}</span>
       </nav>
 
       {/* 主要內容 */}
@@ -257,7 +258,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
 
             {/* 價格顯示 */}
             <div className="mb-6">
-              <div className="text-4xl font-bold text-orange-500 mb-2">
+              <div className="text-4xl font-bold text-primary-500 mb-2">
                 {house.price}
                 <span className="text-lg text-gray-600 ml-2">萬元</span>
               </div>
@@ -300,7 +301,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
               {house.features.map((feature, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-orange-100 text-orange-700 border border-orange-200"
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-700 border border-primary-200"
                 >
                   ✓ {feature}
                 </span>
@@ -446,11 +447,11 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
             {/* 聯絡資訊 */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-orange-500 mb-2">
+                <div className="text-4xl font-bold text-primary-500 mb-2">
                   {house.price}萬元
                 </div>
                 <div className="text-gray-600 text-sm">含車位價格</div>
-                <div className="text-orange-500 font-medium">
+                <div className="text-primary-500 font-medium">
                   單價約{Math.round((house.price * 10000) / house.area)}元/坪
                 </div>
               </div>
@@ -468,10 +469,10 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
               </div>
 
               <div className="space-y-3">
-                <button className="w-full bg-orange-500 text-white py-4 rounded-lg hover:bg-orange-600 transition duration-200 font-bold text-lg flex items-center justify-center gap-2">
+                <button className="w-full bg-primary-500 text-white py-4 rounded-lg hover:bg-primary-600 transition duration-200 font-bold text-lg flex items-center justify-center gap-2">
                   📞 {house.contact.phone}
                 </button>
-                <button className="w-full border-2 border-orange-500 text-orange-500 py-3 rounded-lg hover:bg-orange-50 transition duration-200 font-medium">
+                <button className="w-full border-2 border-primary-500 text-primary-500 py-3 rounded-lg hover:bg-primary-50 transition duration-200 font-medium">
                   預約看屋
                 </button>
                 <button className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition duration-200 font-medium">

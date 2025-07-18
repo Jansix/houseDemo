@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { House } from '@/data/houses'
 import { useTwCitySelector } from '@/hooks/useTwCitySelector'
 import dynamic from 'next/dynamic'
+import config from '@/data/config'
 
 // 動態載入富文本編輯器，避免 SSR 問題
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
@@ -887,7 +888,7 @@ export default function PublishPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {isSubmitting ? '刊登中...' : '確認刊登'}
           </button>
