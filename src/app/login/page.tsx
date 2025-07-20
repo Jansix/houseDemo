@@ -14,7 +14,7 @@ interface LoginFormData {
 
 export default function LoginPage() {
   const router = useRouter()
-  const { isAuthenticated, refreshAuthState } = useAuth()
+  const { isAuthenticated, setUser } = useAuth()
 
   const [formData, setFormData] = useState<LoginFormData>({
     login: '',
@@ -83,15 +83,29 @@ export default function LoginPage() {
 
       console.log('登入成功，回應:', response)
 
-      // 登入成功後刷新認證狀態
-      console.log('開始刷新認證狀態...')
-      await refreshAuthState()
-      console.log('認證狀態刷新完成')
+      // 如果登入成功，獲取使用者資料並設定到 context
+      if (response.success && response.user) {
+        console.log('設定使用者資料到 context:', response.user)
 
-      // 延遲一下確保狀態更新完成
-      setTimeout(() => {
+        // 將後端回傳的使用者資料轉換為 UserProfile 格式
+        const userProfile = {
+          id: response.user.id,
+          name: response.user.name,
+          phone: '', // 後端回傳的資料中沒有這些欄位，先設為空
+          avatar: '',
+          department: '',
+          lineId: '',
+          whatsappId: '',
+        }
+
+        setUser(userProfile)
+
+        // 導向首頁
+        console.log('登入成功，導向首頁')
         router.push('/')
-      }, 100)
+      } else {
+        alert('登入失敗：' + (response.message || '未知錯誤'))
+      }
     } catch (error: any) {
       console.error('登入失敗，完整錯誤資訊:', error)
 

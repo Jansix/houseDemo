@@ -4,21 +4,13 @@ import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 
 export default function NavigationAuth() {
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, user } = useAuth()
 
   // 調試資訊
   console.log('NavigationAuth 狀態:', {
     isAuthenticated,
     user: user ? `${user.name} (${user.id})` : null,
   })
-
-  const handleLogout = async () => {
-    try {
-      await logout()
-    } catch (error) {
-      console.error('登出失敗:', error)
-    }
-  }
 
   if (isAuthenticated && user) {
     return (
@@ -30,19 +22,12 @@ export default function NavigationAuth() {
           歡迎，{user.name}
         </Link>
         {/* 管理員才顯示管理頁面連結 */}
-        {/* TODO: 等有權限系統後，根據使用者角色顯示 */}
         <Link
           href="/admin"
           className="text-gray-700 hover:text-primary-600 transition duration-200"
         >
           管理
         </Link>
-        <button
-          onClick={handleLogout}
-          className="text-gray-700 hover:text-primary-600 transition duration-200"
-        >
-          登出
-        </button>
       </div>
     )
   }

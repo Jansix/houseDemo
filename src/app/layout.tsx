@@ -125,7 +125,14 @@ export default function RootLayout({
               {children}
             </main>
 
-            <footer className="bg-gray-800 text-white">
+            <footer
+              className="bg-gradient-to-b from-gradientMain to-gradientSub text-white"
+              style={{
+                background:
+                  'linear-gradient(to right, hsl(var(--gradient-main)), hsl(var(--gradient-mid)), hsl(var(--gradient-sub)))',
+                boxShadow: '0 -4px 6px rgba(0, 0, 0, 0.1)', // 增加質感陰影
+              }}
+            >
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div>
@@ -172,7 +179,7 @@ export default function RootLayout({
                     </ul>
                   </div>
                 </div>
-                <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
+                <div className=" mt-8 pt-8 text-center text-gray-300">
                   <p>&copy; 2025 {config.title} Demo. All rights reserved.</p>
                 </div>
               </div>

@@ -9,8 +9,9 @@ import tinycolor from 'tinycolor2'
 // 定義主題的結構
 interface Theme {
   primary: string // HEX format, e.g., "#ea580c"
-  secondary: string
-  accent: string
+  gradient_main: string
+  gradient_mid: string
+  gradient_sub: string
 }
 
 const ThemeContext = createContext({})
@@ -21,25 +22,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const fetchAndApplyTheme = async () => {
       try {
-        // 假設 API 回傳基準顏色
-        const baseHex = '#EA0000'
-        const baseColor = tinycolor(baseHex)
-
-        // 動態生成色階 (這只是個簡單範例，實際算法可能更複雜)
+        // 假設 API 回傳三個 HEX 色碼
+        const themeFromApi = {
+          primary: '#ea580c',
+          gradient_main: '#2C3E50', // 深藍色
+          gradient_mid: '#3A506B', // 淡紫色
+          gradient_sub: '#1F2937', // 淡粉色
+        }
+        // 主色處理
+        const baseColor = tinycolor(themeFromApi.primary)
         const shades = {
           '50': baseColor.clone().lighten(35).toHexString(),
           '100': baseColor.clone().lighten(25).toHexString(),
           '200': baseColor.clone().lighten(15).toHexString(),
           '300': baseColor.clone().lighten(5).toHexString(),
           '400': baseColor.clone().lighten(2).toHexString(),
-          '500': baseColor.clone().toHexString(), // 假設 500 是基準色
+          '500': baseColor.clone().toHexString(),
           '600': baseColor.clone().darken(5).toHexString(),
           '700': baseColor.clone().darken(12).toHexString(),
           '800': baseColor.clone().darken(20).toHexString(),
           '900': baseColor.clone().darken(28).toHexString(),
         }
-
-        // 迴圈設定所有 CSS 變數
         for (const [shade, hex] of Object.entries(shades)) {
           const hsl = hexToHsl(hex)
           if (hsl) {
@@ -48,6 +51,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
               hsl
             )
           }
+        }
+        // 漸層主色
+        const gradientMainHsl = hexToHsl(themeFromApi.gradient_main)
+        if (gradientMainHsl) {
+          document.documentElement.style.setProperty(
+            '--gradient-main',
+            gradientMainHsl
+          )
+        }
+        // 漸層中間色
+        const gradientMidHsl = hexToHsl(themeFromApi.gradient_mid)
+        if (gradientMidHsl) {
+          document.documentElement.style.setProperty(
+            '--gradient-mid',
+            gradientMidHsl
+          )
+        }
+        // 漸層輔助色
+        const gradientSubHsl = hexToHsl(themeFromApi.gradient_sub)
+        if (gradientSubHsl) {
+          document.documentElement.style.setProperty(
+            '--gradient-sub',
+            gradientSubHsl
+          )
         }
       } catch (error) {
         console.error('載入主題失敗:', error)

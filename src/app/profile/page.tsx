@@ -7,7 +7,7 @@ import { authService } from '@/services/authService'
 import config from '@/data/config'
 
 export default function ProfilePage() {
-  const { user, logout, refreshAuthState } = useAuth()
+  const { user, setUser } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -84,8 +84,8 @@ export default function ProfilePage() {
         formData.append('avatar', selectedFile)
       }
 
-      await authService.updateProfileWithFormData(formData)
-      await refreshAuthState() // 重新載入使用者資料
+      const updatedUser = await authService.updateProfileWithFormData(formData)
+      setUser(updatedUser) // 更新使用者資料到 context
       setIsEditing(false)
       setSelectedFile(null)
       alert('個人資料更新成功！')
@@ -110,14 +110,6 @@ export default function ProfilePage() {
       setSelectedFile(null)
     }
     setIsEditing(false)
-  }
-
-  const handleLogout = async () => {
-    try {
-      await logout()
-    } catch (error) {
-      console.error('登出失敗:', error)
-    }
   }
 
   return (
@@ -333,15 +325,6 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <button
-              onClick={handleLogout}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
-            >
-              登出
-            </button>
-          </div>
         </div>
       </div>
     </PrivateRoute>
