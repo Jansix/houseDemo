@@ -1,7 +1,8 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { House } from '@/data/houses'
+import { House } from '@/types/house'
 import config from '@/data/config'
 
 interface HouseCardProps {
@@ -9,19 +10,17 @@ interface HouseCardProps {
 }
 
 function HouseCard({ house }: HouseCardProps) {
-  const typeMap = {
-    apartment: '公寓',
-    house: '透天厝',
-    villa: '別墅',
-  }
-
   return (
-    <Link href={`/houses/${house.id}`} className="block">
+    <Link href={`/houses/${house.house_id}`} className="block">
       <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden text-gray-900">
         {/* 圖片區域 */}
         <div className="relative h-48 bg-gray-200 overflow-hidden">
           <img
-            src={house.images[0]}
+            src={
+              house.images && house.images.length > 0
+                ? `https://house_demo.codychen.me${house.images[0]}`
+                : ''
+            }
             alt={house.title}
             className="w-full h-full object-cover"
             onError={(e) => {
@@ -52,7 +51,7 @@ function HouseCard({ house }: HouseCardProps) {
             {house.title}
           </h3>
 
-          <p className="text-gray-600 text-sm mb-3">📍 {house.address}</p>
+          <p className="text-gray-600 text-sm mb-3">📍 {house.addr}</p>
 
           {/* 房屋資訊 */}
           <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
@@ -60,30 +59,33 @@ function HouseCard({ house }: HouseCardProps) {
               🏠 {house.rooms}房{house.bathrooms}衛
             </span>
             <span className="flex items-center gap-1">📐 {house.area}坪</span>
-            <span className="flex items-center gap-1">🏢 {house.floor}</span>
+            <span className="flex items-center gap-1">
+              🏢 {house.current_floor}/{house.total_floor}樓
+            </span>
           </div>
 
           {/* 物件類型 */}
           <div className="flex items-center justify-between">
             <span className="inline-block bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-              {typeMap[house.type]}
+              {house.house_type}
             </span>
             <span className="text-xs text-gray-500">
-              {new Date(house.postedDate).toLocaleDateString('zh-TW')}
+              {new Date(house.posted_date).toLocaleDateString('zh-TW')}
             </span>
           </div>
 
           {/* 特色標籤 */}
           <div className="flex flex-wrap gap-1 mt-3">
-            {house.features.slice(0, 3).map((feature, index) => (
-              <span
-                key={index}
-                className="inline-block bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs"
-              >
-                {feature}
-              </span>
-            ))}
-            {house.features.length > 3 && (
+            {house.features &&
+              house.features.slice(0, 3).map((feature, index) => (
+                <span
+                  key={index}
+                  className="inline-block bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs"
+                >
+                  {feature}
+                </span>
+              ))}
+            {house.features && house.features.length > 3 && (
               <span className="text-xs text-gray-500">
                 +{house.features.length - 3}個特色
               </span>
@@ -95,12 +97,59 @@ function HouseCard({ house }: HouseCardProps) {
   )
 }
 
+type SortOption = 'newest' | 'price-low' | 'price-high' | 'area-large'
+
 interface HouseListProps {
   houses: House[]
   loading?: boolean
+  onSortChange?: (sortedHouses: House[]) => void
 }
 
-export default function HouseList({ houses, loading = false }: HouseListProps) {
+export default function HouseList({
+  houses,
+  loading = false,
+  onSortChange,
+}: HouseListProps) {
+  const [sortOption, setSortOption] = useState<SortOption>('newest')
+
+  // 排序邏輯
+  const sortHouses = (housesToSort: House[], option: SortOption): House[] => {
+    const sorted = [...housesToSort]
+
+    switch (option) {
+      case 'newest':
+        return sorted.sort(
+          (a, b) =>
+            new Date(b.posted_date).getTime() -
+            new Date(a.posted_date).getTime()
+        )
+      case 'price-low':
+        return sorted.sort((a, b) => a.price - b.price)
+      case 'price-high':
+        return sorted.sort((a, b) => b.price - a.price)
+      case 'area-large':
+        return sorted.sort((a, b) => b.area - a.area)
+      default:
+        return sorted
+    }
+  }
+
+  // 當排序選項改變時
+  const handleSortChange = (newSortOption: SortOption) => {
+    setSortOption(newSortOption)
+    const sortedHouses = sortHouses(houses, newSortOption)
+    onSortChange?.(sortedHouses)
+  }
+
+  // 當 houses 改變時，重新排序
+  useEffect(() => {
+    if (houses.length > 0) {
+      const sortedHouses = sortHouses(houses, sortOption)
+      onSortChange?.(sortedHouses)
+    }
+  }, [houses, sortOption])
+
+  const displayHouses = sortHouses(houses, sortOption)
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -139,7 +188,11 @@ export default function HouseList({ houses, loading = false }: HouseListProps) {
         <h2 className="text-xl font-bold text-gray-800">
           找到 {houses.length} 間房屋
         </h2>
-        <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+        <select
+          value={sortOption}
+          onChange={(e) => handleSortChange(e.target.value as SortOption)}
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
           <option value="newest">最新刊登</option>
           <option value="price-low">價格低到高</option>
           <option value="price-high">價格高到低</option>
@@ -148,8 +201,8 @@ export default function HouseList({ houses, loading = false }: HouseListProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {houses.map((house) => (
-          <HouseCard key={house.id} house={house} />
+        {displayHouses.map((house) => (
+          <HouseCard key={house.house_id} house={house} />
         ))}
       </div>
     </div>

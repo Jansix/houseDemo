@@ -8,23 +8,22 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  success: boolean
-  message?: string
-  user?: {
-    id: string
-    name: string
-    email: string
-  }
+  expire: string
+  msg: string
+}
+
+export interface ProfileResponse {
+  username: string
+  phone: string | null
+  avatar: string
+  department: string
 }
 
 export interface UserProfile {
-  id: string
-  name: string
-  phone: string
+  username: string
+  phone: string | null
   avatar: string
   department: string
-  lineId: string
-  whatsappId: string
 }
 
 export const authService = {
@@ -36,8 +35,8 @@ export const authService = {
   },
 
   // 獲取使用者資料（當需要時才呼叫）
-  getProfile: async (): Promise<UserProfile> => {
-    return api.get<UserProfile>('/service/user/profile', {}, { auth: true })
+  getProfile: async (): Promise<ProfileResponse> => {
+    return api.get<ProfileResponse>('/service/user/profile', {}, { auth: true })
   },
 
   // 更新使用者資料

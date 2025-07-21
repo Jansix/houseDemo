@@ -2,24 +2,57 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import SearchFilters, {
-  SearchFilters as SearchFiltersType,
-} from '@/components/SearchFilters'
+import SearchFilters from '@/components/SearchFilters'
+import type { SearchFilters as SearchFiltersType } from '@/types/house'
 import HouseList from '@/components/HouseList'
-import { houses, House } from '@/data/houses'
+import { House } from '@/types/house'
+import { houseService } from '@/services/houseService'
 import config from '@/data/config'
 
 export default function HomePage() {
-  const [allHouses, setAllHouses] = useState<House[]>(houses)
-  const [filteredHouses, setFilteredHouses] = useState<House[]>(houses)
-  const [loading, setLoading] = useState(false)
+  const [allHouses, setAllHouses] = useState<House[]>([])
+  const [filteredHouses, setFilteredHouses] = useState<House[]>([])
+  const [sortedHouses, setSortedHouses] = useState<House[]>([])
+  const [loading, setLoading] = useState(true) // 初始設為 true，載入 API 資料時
+  const [error, setError] = useState<string | null>(null)
 
-  // 載入時從 localStorage 取得新增的房屋
+  // 載入時從 API 獲取房屋資料
   useEffect(() => {
-    const newHouses = JSON.parse(localStorage.getItem('newHouses') || '[]')
-    const combinedHouses = [...newHouses, ...houses]
-    setAllHouses(combinedHouses)
-    setFilteredHouses(combinedHouses)
+    const fetchHouses = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        console.log('開始獲取房屋列表...')
+
+        // 從 API 獲取房屋資料
+        const apiHouses = await houseService.getHouseList()
+        console.log('API 房屋資料:', apiHouses)
+
+        // 從 localStorage 取得新增的房屋（如果有的話）
+        const newHouses = JSON.parse(localStorage.getItem('newHouses') || '[]')
+
+        // 合併 API 資料和本地資料
+        const combinedHouses = [...apiHouses, ...newHouses]
+
+        setAllHouses(combinedHouses)
+        setFilteredHouses(combinedHouses)
+        setSortedHouses(combinedHouses)
+        console.log('房屋列表載入成功，共', combinedHouses.length, '筆資料')
+      } catch (error) {
+        console.error('獲取房屋列表失敗:', error)
+        setError('無法載入房屋資料，請稍後再試')
+
+        // 發生錯誤時，僅使用 localStorage 的資料作為備用
+        const newHouses = JSON.parse(localStorage.getItem('newHouses') || '[]')
+        setAllHouses(newHouses)
+        setFilteredHouses(newHouses)
+        setSortedHouses(newHouses)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchHouses()
   }, [])
 
   const handleSearch = (filters: SearchFiltersType) => {
@@ -34,9 +67,7 @@ export default function HomePage() {
         result = result.filter(
           (house) =>
             house.title.toLowerCase().includes(filters.keyword.toLowerCase()) ||
-            house.address
-              .toLowerCase()
-              .includes(filters.keyword.toLowerCase()) ||
+            house.addr.toLowerCase().includes(filters.keyword.toLowerCase()) ||
             house.description
               .toLowerCase()
               .includes(filters.keyword.toLowerCase())
@@ -45,21 +76,19 @@ export default function HomePage() {
 
       // 城市篩選
       if (filters.city) {
-        result = result.filter((house) => house.address.includes(filters.city))
+        result = result.filter((house) => house.addr.includes(filters.city))
       }
 
       // 區域篩選
       if (filters.district) {
-        result = result.filter((house) =>
-          house.address.includes(filters.district)
-        )
+        result = result.filter((house) => house.addr.includes(filters.district))
       }
 
       // 價格篩選
       if (filters.minPrice > 0) {
         result = result.filter((house) => house.price >= filters.minPrice)
       }
-      if (filters.maxPrice < 10000) {
+      if (filters.maxPrice > 0) {
         result = result.filter((house) => house.price <= filters.maxPrice)
       }
 
@@ -67,7 +96,7 @@ export default function HomePage() {
       if (filters.minArea > 0) {
         result = result.filter((house) => house.area >= filters.minArea)
       }
-      if (filters.maxArea < 200) {
+      if (filters.maxArea > 0) {
         result = result.filter((house) => house.area <= filters.maxArea)
       }
 
@@ -84,12 +113,19 @@ export default function HomePage() {
 
       // 物件類型篩選
       if (filters.type) {
-        result = result.filter((house) => house.type === filters.type)
+        result = result.filter((house) => house.house_type === filters.type)
       }
 
+      console.log('篩選結果:', result.length, '筆資料')
       setFilteredHouses(result)
+      setSortedHouses(result)
       setLoading(false)
-    }, 500)
+    }, 0)
+  }
+
+  // 處理排序變更
+  const handleSortChange = (sortedHousesFromList: House[]) => {
+    setSortedHouses(sortedHousesFromList)
   }
 
   return (
@@ -102,16 +138,16 @@ export default function HomePage() {
         <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
           精選優質房屋，使用進階篩選功能找到最適合您的房屋
         </p>
-        <Link
+        {/* <Link
           href="/publish"
           className={`inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition duration-200 font-medium`}
         >
           + 免費刊登房屋
-        </Link>
+        </Link> */}
       </div>
 
       {/* 統計資訊 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-lg p-4 text-center shadow-sm">
           <div className="text-2xl font-bold text-primary-600">
             {allHouses.length}
@@ -136,13 +172,41 @@ export default function HomePage() {
           </div>
           <div className="text-sm text-gray-600">別墅</div>
         </div>
-      </div>
+      </div> */}
 
       {/* 搜尋篩選器 */}
       <SearchFilters onSearch={handleSearch} />
 
+      {/* 錯誤提示 */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-red-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 房屋列表 */}
-      <HouseList houses={filteredHouses} loading={loading} />
+      <HouseList
+        houses={filteredHouses}
+        loading={loading}
+        onSortChange={handleSortChange}
+      />
     </div>
   )
 }

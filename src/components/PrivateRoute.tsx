@@ -6,19 +6,19 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    // 未認證時，導向登入頁
-    if (!isAuthenticated) {
+    // 只有在不是載入中且未認證時，才導向登入頁
+    if (!isLoading && !isAuthenticated) {
       router.push('/login')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isLoading, router])
 
-  // 確認已驗證，才渲染頁面內容
-  if (!isAuthenticated) {
-    return null // 返回 null 來避免在重導向前短暫顯示內容
+  // 載入中或未認證時，不渲染內容
+  if (isLoading || !isAuthenticated) {
+    return null
   }
 
   return <>{children}</>

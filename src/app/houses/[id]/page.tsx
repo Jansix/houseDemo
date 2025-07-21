@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { houses, House } from '@/data/houses'
+import { houses } from '@/data/houses'
+import { House } from '@/types/house'
 import RelatedHouses from '@/components/RelatedHouses'
 import config from '@/data/config'
+import toast from 'react-hot-toast'
 
 // Swiper imports
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -50,7 +52,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
     // 模擬載入延遲
     setTimeout(() => {
       // 從合併後的列表中尋找房屋
-      const foundHouse = combinedHouses.find((h) => h.id === params.id)
+      const foundHouse = combinedHouses.find((h) => h.house_id === params.id)
       setHouse(foundHouse || null)
       setLoading(false)
     }, 300)
@@ -90,10 +92,13 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
     )
   }
 
-  const typeMap = {
+  const typeMap: { [key: string]: string } = {
     apartment: '公寓',
     house: '透天厝',
     villa: '別墅',
+    公寓: '公寓',
+    透天厝: '透天厝',
+    別墅: '別墅',
   }
 
   const openLightbox = (index: number) => {
@@ -111,13 +116,15 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
         <span className="mx-2 text-gray-400">&gt;</span>
         <span className="text-gray-600">房屋</span>
         <span className="mx-2 text-gray-400">&gt;</span>
-        <span className="text-gray-600">{house.address.split('市')[0]}市</span>
+        <span className="text-gray-600">{house.addr.split('市')[0]}市</span>
         <span className="mx-2 text-gray-400">&gt;</span>
         <span className="text-gray-600">
-          {house.address.split('區')[0].split('市')[1]}區
+          {house.addr.split('區')[0].split('市')[1]}區
         </span>
         <span className="mx-2 text-gray-400">&gt;</span>
-        <span className="text-gray-600">{typeMap[house.type]}</span>
+        <span className="text-gray-600">
+          {typeMap[house.house_type] || house.house_type}
+        </span>
         <span className="mx-2 text-gray-400">&gt;</span>
         <span className="text-gray-600">
           {house.price < 1000
@@ -284,13 +291,14 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-gray-800">
-                  {house.floor}
+                  {house.current_floor}/{house.total_floor}樓
                 </div>
                 <div className="text-sm text-gray-600">樓層</div>
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-gray-800">
-                  {house.age}年
+                  {new Date().getFullYear() - new Date(house.age).getFullYear()}
+                  年
                 </div>
                 <div className="text-sm text-gray-600">屋齡</div>
               </div>
@@ -309,10 +317,10 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
             </div>
 
             <div className="flex items-center justify-between text-sm text-gray-500">
-              <span>📍 {house.address}</span>
+              <span>📍 {house.addr}</span>
               <span>
                 刊登日期：
-                {new Date(house.postedDate).toLocaleDateString('zh-TW')}
+                {new Date(house.posted_date).toLocaleDateString('zh-TW')}
               </span>
             </div>
           </div>
@@ -323,37 +331,33 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">現況</span>
-                <span className="font-medium">
-                  {house.houseDetails.currentStatus}
-                </span>
+                <span className="font-medium">{house.current_status}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">型態</span>
-                <span className="font-medium">{typeMap[house.type]}</span>
+                <span className="font-medium">
+                  {typeMap[house.house_type] || house.house_type}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">管理費</span>
                 <span className="font-medium">
-                  {house.houseDetails.managementFee > 0
-                    ? `${house.houseDetails.managementFee}元/月`
+                  {house.management_fee > 0
+                    ? `${house.management_fee}元/月`
                     : '無'}
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">車位</span>
-                <span className="font-medium">
-                  {house.houseDetails.parkingSpace ? '有' : '無'}
-                </span>
+                <span className="font-medium">{house.parking_space}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">裝潢程度</span>
-                <span className="font-medium">
-                  {house.houseDetails.decoration}
-                </span>
+                <span className="font-medium">{house.decoration}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">單位</span>
-                <span className="font-medium">{house.houseDetails.unit}</span>
+                <span className="font-medium">{house.unit}</span>
               </div>
             </div>
           </div>
@@ -365,44 +369,44 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
               <div>
                 <h4 className="font-semibold text-gray-800 mb-3">學區</h4>
                 <p className="text-gray-700 text-sm mb-4">
-                  {house.nearbyFacilities.schools.join('、')}
+                  {house.schools.join('、')}
                 </p>
 
                 <h4 className="font-semibold text-gray-800 mb-3">熱門商圈</h4>
                 <p className="text-gray-700 text-sm mb-4">
-                  {house.nearbyFacilities.commercialAreas.join('、')}
+                  {house.commercial_areas.join('、')}
                 </p>
 
                 <h4 className="font-semibold text-gray-800 mb-3">超商/賣場</h4>
                 <p className="text-gray-700 text-sm mb-4">
-                  {house.nearbyFacilities.stores.join('、')}
+                  {house.stores.join('、')}
                 </p>
 
                 <h4 className="font-semibold text-gray-800 mb-3">傳統市場</h4>
                 <p className="text-gray-700 text-sm">
-                  {house.nearbyFacilities.markets.join('、')}
+                  {house.markets.join('、')}
                 </p>
               </div>
 
               <div>
                 <h4 className="font-semibold text-gray-800 mb-3">醫療機構</h4>
                 <p className="text-gray-700 text-sm mb-4">
-                  {house.nearbyFacilities.medical.join('、')}
+                  {house.medical.join('、')}
                 </p>
 
                 <h4 className="font-semibold text-gray-800 mb-3">政府機構</h4>
                 <p className="text-gray-700 text-sm mb-4">
-                  {house.nearbyFacilities.government.join('、')}
+                  {house.government.join('、')}
                 </p>
 
                 <h4 className="font-semibold text-gray-800 mb-3">其他配套</h4>
                 <p className="text-gray-700 text-sm mb-4">
-                  {house.nearbyFacilities.others.join('、')}
+                  {house.others.join('、')}
                 </p>
 
                 <h4 className="font-semibold text-gray-800 mb-3">公共建設</h4>
                 <p className="text-gray-700 text-sm">
-                  {house.nearbyFacilities.publicFacilities.join('、')}
+                  {house.public_facilities.join('、')}
                 </p>
               </div>
             </div>
@@ -459,25 +463,54 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
               <div className="space-y-4 mb-6">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center">
-                    <span className="text-2xl">�</span>
+                    <span className="text-2xl">👤</span>
                   </div>
-                  <div className="font-medium text-gray-800">
-                    {house.contact.name}
-                  </div>
-                  <div className="text-sm text-gray-600">(屋主)</div>
+                  {house.contact ? (
+                    <>
+                      <div className="font-medium text-gray-800">
+                        {house.contact.name}
+                      </div>
+                      <div className="text-sm text-gray-600">(屋主)</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="font-medium text-gray-800">房屋仲介</div>
+                      <div className="text-sm text-gray-600">(專業代理)</div>
+                    </>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <button className="w-full bg-primary-500 text-white py-4 rounded-lg hover:bg-primary-600 transition duration-200 font-bold text-lg flex items-center justify-center gap-2">
-                  📞 {house.contact.phone}
+                <button
+                  className="w-full bg-primary-500 text-white py-4 rounded-lg hover:bg-primary-600 transition duration-200 font-bold text-lg flex items-center justify-center gap-2"
+                  onClick={() => {
+                    if (house.contact?.phone) {
+                      navigator.clipboard.writeText(house.contact.phone)
+                      toast.success('已複製聯絡電話到剪貼簿')
+                    }
+                  }}
+                >
+                  {house.contact ? house.contact.phone : '聯絡電話'}
                 </button>
-                <button className="w-full border-2 border-primary-500 text-primary-500 py-3 rounded-lg hover:bg-primary-50 transition duration-200 font-medium">
-                  預約看屋
-                </button>
-                <button className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition duration-200 font-medium">
+                {house.contact?.phone ? (
+                  <a
+                    href={`tel:${house.contact.phone}`}
+                    className="w-full block border-2 border-primary-500 text-primary-500 py-3 rounded-lg hover:bg-primary-50 transition duration-200 font-medium text-center"
+                  >
+                    預約看屋
+                  </a>
+                ) : (
+                  <button
+                    className="w-full border-2 border-primary-500 text-primary-500 py-3 rounded-lg hover:bg-primary-50 transition duration-200 font-medium"
+                    disabled
+                  >
+                    預約看屋
+                  </button>
+                )}
+                {/* <button className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition duration-200 font-medium">
                   收藏物件
-                </button>
+                </button> */}
               </div>
             </div>
 

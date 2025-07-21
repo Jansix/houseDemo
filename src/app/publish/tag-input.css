@@ -1,0 +1,85 @@
+/* React TagsInput 樣式 */
+.react-tagsinput {
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  align-items: flex-start;
+  transition: all 0.2s ease-in-out;
+}
+
+.react-tagsinput:focus-within {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.react-tagsinput-tag {
+  background-color: #fef3e2;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+  border-radius: 9999px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.react-tagsinput-tag:hover {
+  background-color: #fde68a;
+  color: #78350f;
+}
+
+.react-tagsinput-remove {
+  color: #92400e;
+  cursor: pointer;
+  font-weight: bold;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1;
+  transition: color 0.2s ease-in-out;
+}
+
+.react-tagsinput-remove:hover {
+  color: #dc2626;
+}
+
+.react-tagsinput-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  min-width: 120px;
+  padding: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.react-tagsinput-input::placeholder {
+  color: #9ca3af;
+}
+
+/* 確保在沒有標籤時輸入框能正常顯示 */
+.react-tagsinput.react-tagsinput--focused {
+  border-color: #f59e0b;
+}
+
+/* 客製化樣式以符合專案設計 */
+.react-tagsinput {
+  font-family: inherit;
+}
+
+.react-tagsinput-tag {
+  font-family: inherit;
+}
+
+.react-tagsinput-input {
+  font-family: inherit;
+}

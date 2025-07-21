@@ -4,13 +4,12 @@ import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 
 export default function NavigationAuth() {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user, isLoading } = useAuth()
 
-  // 調試資訊
-  console.log('NavigationAuth 狀態:', {
-    isAuthenticated,
-    user: user ? `${user.name} (${user.id})` : null,
-  })
+  // 載入中時顯示占位符
+  if (isLoading) {
+    return <div className="animate-pulse h-8 w-20 bg-gray-200 rounded"></div>
+  }
 
   if (isAuthenticated && user) {
     return (
@@ -19,7 +18,7 @@ export default function NavigationAuth() {
           href="/profile"
           className="text-gray-700 hover:text-primary-600 transition duration-200"
         >
-          歡迎，{user.name}
+          歡迎，{user.username}
         </Link>
         {/* 管理員才顯示管理頁面連結 */}
         <Link

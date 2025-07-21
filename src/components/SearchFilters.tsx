@@ -1,34 +1,24 @@
 'use client'
 
 import { useState } from 'react'
-import { cities, districts } from '@/data/houses'
+import { useTwCitySelector } from '@/hooks/useTwCitySelector'
+import type { SearchFilters } from '@/types/house'
 import config from '@/data/config'
 
 interface SearchFiltersProps {
   onSearch: (filters: SearchFilters) => void
 }
 
-export interface SearchFilters {
-  keyword: string
-  city: string
-  district: string
-  minPrice: number
-  maxPrice: number
-  minArea: number
-  maxArea: number
-  rooms: string
-  type: string
-}
-
 export default function SearchFilters({ onSearch }: SearchFiltersProps) {
+  const { cities, getDistricts } = useTwCitySelector()
   const [filters, setFilters] = useState<SearchFilters>({
     keyword: '',
     city: '',
     district: '',
     minPrice: 0,
-    maxPrice: 10000,
+    maxPrice: 0,
     minArea: 0,
-    maxArea: 200,
+    maxArea: 0,
     rooms: '',
     type: '',
   })
@@ -57,9 +47,9 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
       city: '',
       district: '',
       minPrice: 0,
-      maxPrice: 10000,
+      maxPrice: 0,
       minArea: 0,
-      maxArea: 200,
+      maxArea: 0,
       rooms: '',
       type: '',
     }
@@ -114,13 +104,11 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
           >
             <option value="">請選擇區域</option>
             {filters.city &&
-              districts[filters.city as keyof typeof districts]?.map(
-                (district) => (
-                  <option key={district} value={district}>
-                    {district}
-                  </option>
-                )
-              )}
+              getDistricts(filters.city)?.map((district) => (
+                <option key={district} value={district}>
+                  {district}
+                </option>
+              ))}
           </select>
         </div>
       </div>
@@ -148,10 +136,10 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
           </label>
           <input
             type="number"
-            placeholder="10000"
+            placeholder="不限"
             value={filters.maxPrice || ''}
             onChange={(e) =>
-              handleFilterChange('maxPrice', parseInt(e.target.value) || 10000)
+              handleFilterChange('maxPrice', parseInt(e.target.value) || 0)
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
@@ -181,10 +169,10 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
           </label>
           <input
             type="number"
-            placeholder="200"
+            placeholder="不限"
             value={filters.maxArea || ''}
             onChange={(e) =>
-              handleFilterChange('maxArea', parseInt(e.target.value) || 200)
+              handleFilterChange('maxArea', parseInt(e.target.value) || 0)
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
@@ -221,9 +209,9 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="">不限</option>
-            <option value="apartment">公寓</option>
-            <option value="house">透天厝</option>
-            <option value="villa">別墅</option>
+            <option value="公寓">公寓</option>
+            <option value="透天">透天</option>
+            <option value="別墅">別墅</option>
           </select>
         </div>
       </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { authService } from '@/services/authService'
@@ -24,9 +24,15 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Partial<LoginFormData>>({})
 
-  // 如果已經登入，直接導向首頁
+  // 如果已經登入，使用 useEffect 導向首頁
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/')
+    }
+  }, [isAuthenticated, router])
+
+  // 如果已經登入，顯示載入中
   if (isAuthenticated) {
-    router.push('/')
     return null
   }
 
@@ -76,35 +82,37 @@ export default function LoginPage() {
       })
 
       // 呼叫登入 API
-      const response = await authService.login({
+      const loginResponse = await authService.login({
         login: formData.login,
         password: formData.password,
       })
 
-      console.log('登入成功，回應:', response)
+      console.log('登入回應:', loginResponse)
 
-      // 如果登入成功，獲取使用者資料並設定到 context
-      if (response.success && response.user) {
-        console.log('設定使用者資料到 context:', response.user)
+      // 檢查登入是否成功（根據新的回應格式）
+      if (loginResponse.msg === 'login success') {
+        console.log('登入成功，開始獲取使用者資料')
 
-        // 將後端回傳的使用者資料轉換為 UserProfile 格式
+        // 登入成功後，呼叫 getProfile 獲取使用者詳細資料
+        const profileResponse = await authService.getProfile()
+        console.log('使用者資料回應:', profileResponse)
+
+        // 轉換為 UserProfile 格式
         const userProfile = {
-          id: response.user.id,
-          name: response.user.name,
-          phone: '', // 後端回傳的資料中沒有這些欄位，先設為空
-          avatar: '',
-          department: '',
-          lineId: '',
-          whatsappId: '',
+          username: profileResponse.username,
+          phone: profileResponse.phone,
+          avatar: profileResponse.avatar,
+          department: profileResponse.department,
         }
 
+        console.log('設定使用者資料到 context:', userProfile)
         setUser(userProfile)
 
         // 導向首頁
         console.log('登入成功，導向首頁')
         router.push('/')
       } else {
-        alert('登入失敗：' + (response.message || '未知錯誤'))
+        alert('登入失敗，請檢查帳號密碼')
       }
     } catch (error: any) {
       console.error('登入失敗，完整錯誤資訊:', error)

@@ -3,48 +3,18 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { House } from '@/data/houses'
 import { useTwCitySelector } from '@/hooks/useTwCitySelector'
 import dynamic from 'next/dynamic'
 import config from '@/data/config'
+import TagsInput from 'react-tagsinput'
+import { PublishFormData } from '@/types/house'
+import { houseService } from '@/services/houseService'
 
 // 動態載入富文本編輯器，避免 SSR 問題
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 import 'react-quill/dist/quill.snow.css'
-
-interface PublishFormData {
-  title: string
-  price: number
-  address: string
-  city: string
-  district: string
-  area: number
-  rooms: number
-  bathrooms: number
-  floor: string
-  age: number
-  type: 'apartment' | 'house' | 'villa'
-  description: string
-  introduction: string
-  features: string[]
-  currentStatus: string
-  managementFee: number
-  parkingSpace: boolean
-  decoration: string
-  contactName: string
-  contactPhone: string
-  // 新增周邊機能欄位
-  nearbyFacilities: {
-    schools: string
-    commercialAreas: string
-    stores: string
-    markets: string
-    medical: string
-    government: string
-    publicFacilities: string
-    transportation: string
-  }
-}
+import 'react-tagsinput/react-tagsinput.css'
+import './tag-input.css'
 
 export default function PublishPage() {
   const router = useRouter()
@@ -53,34 +23,33 @@ export default function PublishPage() {
   const [formData, setFormData] = useState<PublishFormData>({
     title: '',
     price: 0,
-    address: '',
-    city: '',
-    district: '',
+    addr: '',
     area: 0,
     rooms: 1,
+    living_rooms: 0,
     bathrooms: 1,
-    floor: '',
-    age: 0,
-    type: 'apartment',
+    total_floor: '',
+    current_floor: '',
+    age: '',
+    house_type: '公寓',
+    listing_type: '販售',
     description: '',
     introduction: '',
     features: [],
-    currentStatus: '住宅',
-    managementFee: 0,
-    parkingSpace: false,
+    current_status: '住宅',
+    management_fee: 0,
+    parking_space: '無',
     decoration: '簡單裝潢',
-    contactName: '',
-    contactPhone: '',
-    nearbyFacilities: {
-      schools: '',
-      commercialAreas: '',
-      stores: '',
-      markets: '',
-      medical: '',
-      government: '',
-      publicFacilities: '',
-      transportation: '',
-    },
+    unit: '公寓',
+    schools: [],
+    commercial_areas: [],
+    stores: [],
+    markets: [],
+    medical: [],
+    government: [],
+    others: [],
+    public_facilities: [],
+    imagesBase64: [], // Base64 格式的圖片列表
   })
 
   const [imageBase64List, setImageBase64List] = useState<string[]>([])
@@ -99,6 +68,24 @@ export default function PublishPage() {
         ? prev.features.filter((f) => f !== feature)
         : [...prev.features, feature],
     }))
+  }
+
+  // 處理標籤變更（react-tagsinput 的 API）
+  const handleTagsChange = (
+    field: keyof Pick<
+      PublishFormData,
+      | 'schools'
+      | 'commercial_areas'
+      | 'stores'
+      | 'markets'
+      | 'medical'
+      | 'government'
+      | 'others'
+      | 'public_facilities'
+    >,
+    tags: string[]
+  ) => {
+    handleInputChange(field, tags)
   }
 
   // 將 File 轉換為 base64
@@ -125,7 +112,12 @@ export default function PublishPage() {
       const base64Promises = files.map((file) => fileToBase64(file))
       const newBase64Images = await Promise.all(base64Promises)
 
+      // 更新兩個狀態，保持同步
       setImageBase64List((prev) => [...prev, ...newBase64Images])
+      setFormData((prev) => ({
+        ...prev,
+        imagesBase64: [...(prev.imagesBase64 || []), ...newBase64Images],
+      }))
     } catch (error) {
       console.error('圖片轉換失敗:', error)
       alert('圖片處理失敗，請重試')
@@ -135,6 +127,10 @@ export default function PublishPage() {
   // 移除圖片
   const removeImage = (index: number) => {
     setImageBase64List((prev) => prev.filter((_, i) => i !== index))
+    setFormData((prev) => ({
+      ...prev,
+      imagesBase64: (prev.imagesBase64 || []).filter((_, i) => i !== index),
+    }))
   }
 
   // 提交表單
@@ -146,100 +142,116 @@ export default function PublishPage() {
       // 驗證必填欄位
       if (
         !formData.title ||
-        !formData.city ||
-        !formData.district ||
-        !formData.address ||
+        !formData.addr ||
         !formData.price ||
         !formData.area ||
-        !formData.contactName ||
-        !formData.contactPhone
+        !formData.rooms ||
+        !formData.bathrooms ||
+        !formData.total_floor ||
+        !formData.age ||
+        !formData.description ||
+        !formData.introduction
       ) {
         alert('請填寫所有必填欄位')
         return
       }
 
-      // 建立新房屋資料
-      const newHouse: House = {
-        id: Date.now().toString(), // 使用時間戳作為臨時 ID
-        title: formData.title,
-        price: formData.price, // 將萬元轉換為元
-        address: `${formData.city}${formData.district}${formData.address}`,
-        area: formData.area,
-        rooms: formData.rooms,
-        bathrooms: formData.bathrooms,
-        floor: formData.floor,
-        age: formData.age,
-        type: formData.type,
-        images: imageBase64List.length > 0 ? imageBase64List : ['/house1.png'], // 如果沒有上傳圖片，使用預設圖片
-        description: formData.description,
-        introduction: formData.introduction,
-        postedDate: new Date().toISOString().split('T')[0],
-        features: formData.features,
-        houseDetails: {
-          currentStatus: formData.currentStatus,
-          managementFee: formData.managementFee,
-          parkingSpace: formData.parkingSpace,
-          decoration: formData.decoration,
-          unit: formData.parkingSpace ? '整戶｜含車位' : '整戶｜無車位',
-        },
-        nearbyFacilities: {
-          schools: formData.nearbyFacilities.schools
-            ? formData.nearbyFacilities.schools
-                .split('、')
-                .filter((item) => item.trim())
-            : [],
-          commercialAreas: formData.nearbyFacilities.commercialAreas
-            ? formData.nearbyFacilities.commercialAreas
-                .split('、')
-                .filter((item) => item.trim())
-            : [],
-          stores: formData.nearbyFacilities.stores
-            ? formData.nearbyFacilities.stores
-                .split('、')
-                .filter((item) => item.trim())
-            : [],
-          markets: formData.nearbyFacilities.markets
-            ? formData.nearbyFacilities.markets
-                .split('、')
-                .filter((item) => item.trim())
-            : [],
-          medical: formData.nearbyFacilities.medical
-            ? formData.nearbyFacilities.medical
-                .split('、')
-                .filter((item) => item.trim())
-            : [],
-          government: formData.nearbyFacilities.government
-            ? formData.nearbyFacilities.government
-                .split('、')
-                .filter((item) => item.trim())
-            : [],
-          others: formData.nearbyFacilities.transportation
-            ? formData.nearbyFacilities.transportation
-                .split('、')
-                .filter((item) => item.trim())
-            : [],
-          publicFacilities: formData.nearbyFacilities.publicFacilities
-            ? formData.nearbyFacilities.publicFacilities
-                .split('、')
-                .filter((item) => item.trim())
-            : [],
-        },
-        contact: {
-          name: formData.contactName,
-          phone: formData.contactPhone,
-        },
+      // 準備 FormData
+      const apiFormData = new FormData()
+
+      // 基本欄位
+      // 將所有基本欄位和需要逗號分隔的陣列欄位添加到 FormData 中
+      apiFormData.append('title', formData.title)
+      apiFormData.append('price', formData.price.toString())
+      apiFormData.append('addr', formData.addr)
+      apiFormData.append('area', formData.area.toString())
+      apiFormData.append('rooms', formData.rooms.toString())
+      apiFormData.append('living_rooms', formData.living_rooms.toString())
+      apiFormData.append('bathrooms', formData.bathrooms.toString())
+      apiFormData.append('total_floor', formData.total_floor)
+      apiFormData.append('current_floor', formData.current_floor || '0')
+      apiFormData.append('age', formData.age)
+      apiFormData.append('house_type', formData.house_type)
+      apiFormData.append('listing_type', formData.listing_type)
+      apiFormData.append('description', formData.description)
+      apiFormData.append('introduction', formData.introduction)
+
+      // *** 這裡修改：將 features 陣列轉換為逗號分隔的字串 ***
+      apiFormData.append('features', formData.features.join(','))
+
+      apiFormData.append('current_status', formData.current_status)
+      apiFormData.append('management_fee', formData.management_fee.toString())
+      apiFormData.append('parking_space', formData.parking_space)
+      apiFormData.append('decoration', formData.decoration)
+      apiFormData.append('unit', formData.unit)
+
+      // *** 這裡修改：所有周邊設施陣列也轉換為逗號分隔的字串 ***
+      // 只有當陣列有值時才 append，避免傳送空字串
+      if (formData.schools.length > 0)
+        apiFormData.append('schools', formData.schools.join(','))
+      if (formData.commercial_areas.length > 0)
+        apiFormData.append(
+          'commercial_areas',
+          formData.commercial_areas.join(',')
+        )
+      if (formData.stores.length > 0)
+        apiFormData.append('stores', formData.stores.join(','))
+      if (formData.markets.length > 0)
+        apiFormData.append('markets', formData.markets.join(','))
+      if (formData.medical.length > 0)
+        apiFormData.append('medical', formData.medical.join(','))
+      if (formData.government.length > 0)
+        apiFormData.append('government', formData.government.join(','))
+      if (formData.others.length > 0)
+        apiFormData.append('others', formData.others.join(','))
+      if (formData.public_facilities.length > 0) {
+        apiFormData.append(
+          'public_facilities',
+          formData.public_facilities.join(',')
+        )
       }
 
-      // 將新房屋資料暫存到 localStorage
-      const existingHouses = JSON.parse(
-        localStorage.getItem('newHouses') || '[]'
-      )
-      existingHouses.unshift(newHouse) // 新增到最前面
-      localStorage.setItem('newHouses', JSON.stringify(existingHouses))
+      // 圖片上傳 - 使用 imageBase64List 而不是 formData.imagesBase64
+      imageBase64List.forEach((base64, index) => {
+        if (base64.includes(',')) {
+          const byteString = atob(base64.split(',')[1])
+          const mimeString = base64.split(',')[0].split(':')[1].split(';')[0]
+          const ab = new ArrayBuffer(byteString.length)
+          const ia = new Uint8Array(ab)
+          for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i)
+          }
+          const blob = new Blob([ab], { type: mimeString })
+          // 使用後端期望的參數名稱 'images'
+          apiFormData.append(
+            'images',
+            blob,
+            `image_${index}.${mimeString.split('/')[1] || 'jpg'}`
+          )
+        }
+      })
 
-      alert('房屋刊登成功！')
-      router.push('/')
+      // 詳細顯示表單數據 - 分別顯示原始 formData 和 FormData
+      console.log('=== 原始表單數據 ===')
+      console.log('formData:', formData)
+      console.log('=== 圖片狀態 ===')
+      console.log('imageBase64List 長度:', imageBase64List.length)
+      console.log(
+        'formData.imagesBase64 長度:',
+        formData.imagesBase64?.length || 0
+      )
+
+      // 發送 API 請求
+      const response = await houseService.addHouse(apiFormData)
+
+      if (response.house_id) {
+        alert('房屋刊登成功！')
+        router.push('/')
+      } else {
+        throw new Error('API 請求失敗')
+      }
     } catch (error) {
+      console.error('刊登失敗:', error)
       alert('刊登失敗，請重試')
     } finally {
       setIsSubmitting(false)
@@ -299,62 +311,17 @@ export default function PublishPage() {
               />
             </div>
 
-            {/* 縣市 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                縣市 <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.city}
-                onChange={(e) => {
-                  handleInputChange('city', e.target.value)
-                  handleInputChange('district', '') // 重置區域
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                required
-              >
-                <option value="">請選擇縣市</option>
-                {cities.map((city: string) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* 區域 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                區域 <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.district}
-                onChange={(e) => handleInputChange('district', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                disabled={!formData.city}
-                required
-              >
-                <option value="">請選擇區域</option>
-                {formData.city &&
-                  getDistricts(formData.city).map((district: string) => (
-                    <option key={district} value={district}>
-                      {district}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            {/* 詳細地址 */}
+            {/* 地址 */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                詳細地址 <span className="text-red-500">*</span>
+                地址 <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
+                value={formData.addr}
+                onChange={(e) => handleInputChange('addr', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="請輸入路名及門牌號碼"
+                placeholder="請輸入完整地址，例如：台北市大安區忠孝東路四段"
                 required
               />
             </div>
@@ -398,92 +365,168 @@ export default function PublishPage() {
             {/* 房間數 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                房間數
+                房間數 <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formData.rooms}
+              <input
+                type="number"
+                value={formData.rooms || ''}
                 onChange={(e) =>
                   handleInputChange('rooms', Number(e.target.value))
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <option key={num} value={num}>
-                    {num}房
-                  </option>
-                ))}
-              </select>
+                placeholder="請輸入房間數"
+                min="1"
+                required
+              />
+            </div>
+
+            {/* 廳數 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                廳數
+              </label>
+              <input
+                type="number"
+                value={formData.living_rooms || ''}
+                onChange={(e) =>
+                  handleInputChange('living_rooms', Number(e.target.value) || 0)
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="請輸入廳數"
+                min="0"
+              />
             </div>
 
             {/* 衛浴數 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                衛浴數
+                衛浴數 <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formData.bathrooms}
+              <input
+                type="number"
+                value={formData.bathrooms || ''}
                 onChange={(e) =>
                   handleInputChange('bathrooms', Number(e.target.value))
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                {[1, 2, 3, 4].map((num) => (
-                  <option key={num} value={num}>
-                    {num}衛
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* 樓層 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                樓層
-              </label>
-              <input
-                type="text"
-                value={formData.floor}
-                onChange={(e) => handleInputChange('floor', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="例如：5/12"
+                placeholder="請輸入衛浴數"
+                min="1"
+                required
               />
             </div>
 
-            {/* 屋齡 */}
+            {/* 總樓層 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                屋齡 (年)
+                總樓層 <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
-                value={formData.age || ''}
+                value={formData.total_floor}
                 onChange={(e) =>
-                  handleInputChange('age', Number(e.target.value))
+                  handleInputChange('total_floor', e.target.value)
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="請輸入屋齡"
+                placeholder="請輸入總樓層數"
+                min="1"
+                required
+              />
+            </div>
+
+            {/* 當前樓層 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                當前樓層
+              </label>
+              <input
+                type="number"
+                value={formData.current_floor}
+                onChange={(e) =>
+                  handleInputChange('current_floor', e.target.value)
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="請輸入當前樓層（獨棟請填0）"
                 min="0"
+              />
+            </div>
+
+            {/* 建造日期 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                建造日期 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={formData.age}
+                onChange={(e) => handleInputChange('age', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
               />
             </div>
 
             {/* 物件類型 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                物件類型
+                物件類型 <span className="text-red-500">*</span>
               </label>
               <select
-                value={formData.type}
+                value={formData.house_type}
                 onChange={(e) =>
                   handleInputChange(
-                    'type',
-                    e.target.value as 'apartment' | 'house' | 'villa'
+                    'house_type',
+                    e.target.value as '公寓' | '透天' | '別墅'
                   )
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
               >
-                <option value="apartment">公寓</option>
-                <option value="house">透天厝</option>
-                <option value="villa">別墅</option>
+                <option value="公寓">公寓</option>
+                <option value="透天">透天</option>
+                <option value="別墅">別墅</option>
+              </select>
+            </div>
+
+            {/* 刊登類型 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                刊登類型 <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.listing_type}
+                onChange={(e) =>
+                  handleInputChange(
+                    'listing_type',
+                    e.target.value as '販售' | '出租'
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="販售">販售</option>
+                <option value="出租">出租</option>
+              </select>
+            </div>
+
+            {/* 現況 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                現況 <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.current_status}
+                onChange={(e) =>
+                  handleInputChange(
+                    'current_status',
+                    e.target.value as '辦公室' | '住宅' | '工廠' | '混合用途'
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="住宅">住宅</option>
+                <option value="辦公室">辦公室</option>
+                <option value="工廠">工廠</option>
+                <option value="混合用途">混合用途</option>
               </select>
             </div>
 
@@ -494,14 +537,10 @@ export default function PublishPage() {
               </label>
               <input
                 type="number"
-                value={
-                  formData.managementFee === 0
-                    ? '0'
-                    : formData.managementFee || ''
-                }
+                value={formData.management_fee || ''}
                 onChange={(e) =>
                   handleInputChange(
-                    'managementFee',
+                    'management_fee',
                     Number(e.target.value) || 0
                   )
                 }
@@ -511,63 +550,78 @@ export default function PublishPage() {
               />
             </div>
 
-            {/* 是否有車位 */}
+            {/* 車位 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                車位
+                車位 <span className="text-red-500">*</span>
               </label>
-              <div className="flex items-center space-x-4">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="parkingSpace"
-                    checked={formData.parkingSpace}
-                    onChange={() => handleInputChange('parkingSpace', true)}
-                    className="mr-2"
-                  />
-                  有車位
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="parkingSpace"
-                    checked={!formData.parkingSpace}
-                    onChange={() => handleInputChange('parkingSpace', false)}
-                    className="mr-2"
-                  />
-                  無車位
-                </label>
-              </div>
+              <select
+                value={formData.parking_space}
+                onChange={(e) =>
+                  handleInputChange(
+                    'parking_space',
+                    e.target.value as '平面式' | '機械式' | '無'
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="無">無</option>
+                <option value="平面式">平面式</option>
+                <option value="機械式">機械式</option>
+              </select>
             </div>
 
             {/* 裝潢程度 */}
-            <div className="md:col-span-2">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                裝潢程度
+                裝潢程度 <span className="text-red-500">*</span>
               </label>
-              <div className="flex flex-wrap gap-3">
-                {[
-                  '簡單裝潢',
-                  '精裝裝潢',
-                  '新裝潢',
-                  '豪華裝潢',
-                  '頂級豪華裝潢',
-                ].map((decoration) => (
-                  <label key={decoration} className="flex items-center">
-                    <input
-                      type="radio"
-                      name="decoration"
-                      value={decoration}
-                      checked={formData.decoration === decoration}
-                      onChange={() =>
-                        handleInputChange('decoration', decoration)
-                      }
-                      className="mr-2"
-                    />
-                    {decoration}
-                  </label>
-                ))}
-              </div>
+              <select
+                value={formData.decoration}
+                onChange={(e) =>
+                  handleInputChange(
+                    'decoration',
+                    e.target.value as
+                      | '簡單裝潢'
+                      | '精裝裝潢'
+                      | '新裝潢'
+                      | '豪華裝潢'
+                      | '頂級豪華裝潢'
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="簡單裝潢">簡單裝潢</option>
+                <option value="精裝裝潢">精裝裝潢</option>
+                <option value="新裝潢">新裝潢</option>
+                <option value="豪華裝潢">豪華裝潢</option>
+                <option value="頂級豪華裝潢">頂級豪華裝潢</option>
+              </select>
+            </div>
+
+            {/* 單位 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                單位 <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.unit}
+                onChange={(e) =>
+                  handleInputChange(
+                    'unit',
+                    e.target.value as '公寓' | '社區' | '華夏' | '獨棟'
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="公寓">公寓</option>
+                <option value="社區">社區</option>
+                <option value="華夏">華夏</option>
+                <option value="獨棟">獨棟</option>
+              </select>
             </div>
           </div>
         </div>
@@ -594,84 +648,69 @@ export default function PublishPage() {
         {/* 周邊機能 */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-6">周邊機能</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            請用「、」分隔多個項目，例如：台大醫院、榮總醫院
-          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* 學區 */}
+            {/* 學校 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                學區
+                學校
               </label>
-              <input
-                type="text"
-                value={formData.nearbyFacilities.schools}
-                onChange={(e) =>
-                  handleInputChange('nearbyFacilities', {
-                    ...formData.nearbyFacilities,
-                    schools: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="例如：大安國小、龍門國中"
+              <TagsInput
+                value={formData.schools}
+                onChange={(tags) => handleTagsChange('schools', tags)}
+                inputProps={{
+                  placeholder: '輸入學校名稱後按 Enter 新增標籤',
+                  className: 'react-tagsinput-input',
+                }}
+                addKeys={[13, 188]} // Enter 和 comma
               />
             </div>
 
-            {/* 商圈 */}
+            {/* 商業區域 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                熱門商圈
+                商業區域
               </label>
-              <input
-                type="text"
-                value={formData.nearbyFacilities.commercialAreas}
-                onChange={(e) =>
-                  handleInputChange('nearbyFacilities', {
-                    ...formData.nearbyFacilities,
-                    commercialAreas: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="例如：信義商圈、東區商圈"
+              <TagsInput
+                value={formData.commercial_areas}
+                onChange={(tags) => handleTagsChange('commercial_areas', tags)}
+                inputProps={{
+                  placeholder: '輸入商業區域後按 Enter 新增標籤',
+                  className: 'react-tagsinput-input',
+                }}
+                addKeys={[13, 188]} // Enter 和 comma
               />
             </div>
 
-            {/* 超商/賣場 */}
+            {/* 商店 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                超商/賣場
+                商店
               </label>
-              <input
-                type="text"
-                value={formData.nearbyFacilities.stores}
-                onChange={(e) =>
-                  handleInputChange('nearbyFacilities', {
-                    ...formData.nearbyFacilities,
-                    stores: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="例如：7-11、全聯、家樂福"
+              <TagsInput
+                value={formData.stores}
+                onChange={(tags) => handleTagsChange('stores', tags)}
+                inputProps={{
+                  placeholder: '輸入商店名稱後按 Enter 新增標籤',
+                  className: 'react-tagsinput-input',
+                }}
+                addKeys={[13, 188]} // Enter 和 comma
               />
             </div>
 
-            {/* 傳統市場 */}
+            {/* 市場 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                傳統市場
+                市場
               </label>
-              <input
-                type="text"
-                value={formData.nearbyFacilities.markets}
-                onChange={(e) =>
-                  handleInputChange('nearbyFacilities', {
-                    ...formData.nearbyFacilities,
-                    markets: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="例如：南門市場、建國市場"
+              <TagsInput
+                value={formData.markets}
+                onChange={(tags) => handleTagsChange('markets', tags)}
+                inputProps={{
+                  placeholder: '輸入市場名稱後按 Enter 新增標籤',
+                  className: 'react-tagsinput-input',
+                }}
+                addKeys={[13, 188]} // Enter 和 comma
               />
             </div>
 
@@ -680,36 +719,14 @@ export default function PublishPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 醫療機構
               </label>
-              <input
-                type="text"
-                value={formData.nearbyFacilities.medical}
-                onChange={(e) =>
-                  handleInputChange('nearbyFacilities', {
-                    ...formData.nearbyFacilities,
-                    medical: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="例如：台大醫院、榮總醫院"
-              />
-            </div>
-
-            {/* 交通/其他 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                交通/其他設施
-              </label>
-              <input
-                type="text"
-                value={formData.nearbyFacilities.transportation}
-                onChange={(e) =>
-                  handleInputChange('nearbyFacilities', {
-                    ...formData.nearbyFacilities,
-                    transportation: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="例如：捷運站、公車站、公園"
+              <TagsInput
+                value={formData.medical}
+                onChange={(tags) => handleTagsChange('medical', tags)}
+                inputProps={{
+                  placeholder: '輸入醫療機構名稱後按 Enter 新增標籤',
+                  className: 'react-tagsinput-input',
+                }}
+                addKeys={[13, 188]} // Enter 和 comma
               />
             </div>
 
@@ -718,36 +735,46 @@ export default function PublishPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 政府機構
               </label>
-              <input
-                type="text"
-                value={formData.nearbyFacilities.government}
-                onChange={(e) =>
-                  handleInputChange('nearbyFacilities', {
-                    ...formData.nearbyFacilities,
-                    government: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="例如：區公所、戶政事務所"
+              <TagsInput
+                value={formData.government}
+                onChange={(tags) => handleTagsChange('government', tags)}
+                inputProps={{
+                  placeholder: '輸入政府機構名稱後按 Enter 新增標籤',
+                  className: 'react-tagsinput-input',
+                }}
+                addKeys={[13, 188]} // Enter 和 comma
               />
             </div>
 
-            {/* 公共建設 */}
+            {/* 公共設施 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                公共建設
+                公共設施
               </label>
-              <input
-                type="text"
-                value={formData.nearbyFacilities.publicFacilities}
-                onChange={(e) =>
-                  handleInputChange('nearbyFacilities', {
-                    ...formData.nearbyFacilities,
-                    publicFacilities: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="例如：圖書館、運動中心、公園"
+              <TagsInput
+                value={formData.public_facilities}
+                onChange={(tags) => handleTagsChange('public_facilities', tags)}
+                inputProps={{
+                  placeholder: '輸入公共設施名稱後按 Enter 新增標籤',
+                  className: 'react-tagsinput-input',
+                }}
+                addKeys={[13, 188]} // Enter 和 comma
+              />
+            </div>
+
+            {/* 其他 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                其他
+              </label>
+              <TagsInput
+                value={formData.others}
+                onChange={(tags) => handleTagsChange('others', tags)}
+                inputProps={{
+                  placeholder: '輸入其他設施名稱後按 Enter 新增標籤',
+                  className: 'react-tagsinput-input',
+                }}
+                addKeys={[13, 188]} // Enter 和 comma
               />
             </div>
           </div>
@@ -834,45 +861,6 @@ export default function PublishPage() {
                 ))}
               </div>
             )}
-          </div>
-        </div>
-
-        {/* 聯絡資訊 */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">聯絡資訊</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                聯絡人姓名 <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.contactName}
-                onChange={(e) =>
-                  handleInputChange('contactName', e.target.value)
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="請輸入聯絡人姓名"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                聯絡電話 <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                value={formData.contactPhone}
-                onChange={(e) =>
-                  handleInputChange('contactPhone', e.target.value)
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="請輸入聯絡電話"
-                required
-              />
-            </div>
           </div>
         </div>
 

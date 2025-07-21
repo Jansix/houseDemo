@@ -15,22 +15,18 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [editForm, setEditForm] = useState({
-    name: '',
+    username: '',
     phone: '',
     department: '',
-    lineId: '',
-    whatsappId: '',
   })
 
   // 當 user 資料載入時，更新表單
   useEffect(() => {
     if (user) {
       setEditForm({
-        name: user.name || '',
+        username: user.username || '',
         phone: user.phone || '',
         department: user.department || '',
-        lineId: user.lineId || '',
-        whatsappId: user.whatsappId || '',
       })
       setPreviewUrl(user.avatar || '')
     }
@@ -74,11 +70,9 @@ export default function ProfilePage() {
     try {
       // 使用 FormData 來支援檔案上傳
       const formData = new FormData()
-      formData.append('name', editForm.name)
+      formData.append('username', editForm.username)
       formData.append('phone', editForm.phone)
       formData.append('department', editForm.department)
-      formData.append('lineId', editForm.lineId)
-      formData.append('whatsappId', editForm.whatsappId)
 
       if (selectedFile) {
         formData.append('avatar', selectedFile)
@@ -100,11 +94,9 @@ export default function ProfilePage() {
   const handleCancel = () => {
     if (user) {
       setEditForm({
-        name: user.name || '',
+        username: user.username || '',
         phone: user.phone || '',
         department: user.department || '',
-        lineId: user.lineId || '',
-        whatsappId: user.whatsappId || '',
       })
       setPreviewUrl(user.avatar || '')
       setSelectedFile(null)
@@ -211,30 +203,21 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    使用者 ID
-                  </label>
-                  <p className="px-3 py-2 bg-gray-100 rounded-lg text-gray-900">
-                    {user.id}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    姓名
+                    使用者名稱
                   </label>
                   {isEditing ? (
                     <input
                       type="text"
-                      value={editForm.name}
+                      value={editForm.username}
                       onChange={(e) =>
-                        handleInputChange('name', e.target.value)
+                        handleInputChange('username', e.target.value)
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="請輸入姓名"
+                      placeholder="請輸入使用者名稱"
                     />
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-gray-900">
-                      {user.name || '未設定'}
+                      {user.username || '未設定'}
                     </p>
                   )}
                 </div>
@@ -277,48 +260,6 @@ export default function ProfilePage() {
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-gray-900">
                       {user.phone || '未設定'}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    LINE ID
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editForm.lineId}
-                      onChange={(e) =>
-                        handleInputChange('lineId', e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="請輸入 LINE ID"
-                    />
-                  ) : (
-                    <p className="px-3 py-2 bg-gray-50 rounded-lg text-gray-900">
-                      {user.lineId || '未設定'}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    WhatsApp ID
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editForm.whatsappId}
-                      onChange={(e) =>
-                        handleInputChange('whatsappId', e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="請輸入 WhatsApp ID"
-                    />
-                  ) : (
-                    <p className="px-3 py-2 bg-gray-50 rounded-lg text-gray-900">
-                      {user.whatsappId || '未設定'}
                     </p>
                   )}
                 </div>

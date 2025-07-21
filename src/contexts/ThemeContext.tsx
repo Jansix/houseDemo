@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         // 假設 API 回傳三個 HEX 色碼
         const themeFromApi = {
           primary: '#ea580c',
-          gradient_main: '#2C3E50', // 深藍色
+          gradient_main: '#ea580c', // 深藍色
           gradient_mid: '#3A506B', // 淡紫色
           gradient_sub: '#1F2937', // 淡粉色
         }
