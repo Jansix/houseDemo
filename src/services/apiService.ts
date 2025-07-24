@@ -1,7 +1,7 @@
 // src/services/apiService.ts
 
 import { AxiosRequestConfig } from 'axios'
-import axiosInstance from '@/utils/axiosInstance'
+import apiClient from '@/utils/apiClient' // 使用新的 apiClient
 
 interface ApiOptions {
   headers?: Record<string, string>
@@ -35,7 +35,7 @@ async function request<T>(
   }
 
   try {
-    const response = await axiosInstance(config)
+    const response = await apiClient(config)
     return response.data as T
   } catch (error) {
     console.error(`API Error on ${method.toUpperCase()} ${url}:`, error)
@@ -55,6 +55,6 @@ export const api = {
     request<T>('put', url, data, options),
   patch: <T>(url: string, data: any, options?: ApiOptions) =>
     request<T>('patch', url, data, options),
-  del: <T>(url: string, options?: ApiOptions) =>
-    request<T>('delete', url, null, options),
+  del: <T>(url: string, data: any, options?: ApiOptions) =>
+    request<T>('delete', url, data, options),
 }

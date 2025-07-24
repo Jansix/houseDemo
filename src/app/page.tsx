@@ -7,7 +7,6 @@ import type { SearchFilters as SearchFiltersType } from '@/types/house'
 import HouseList from '@/components/HouseList'
 import { House } from '@/types/house'
 import { houseService } from '@/services/houseService'
-import config from '@/data/config'
 
 export default function HomePage() {
   const [allHouses, setAllHouses] = useState<House[]>([])
@@ -28,25 +27,13 @@ export default function HomePage() {
         const apiHouses = await houseService.getHouseList()
         console.log('API 房屋資料:', apiHouses)
 
-        // 從 localStorage 取得新增的房屋（如果有的話）
-        const newHouses = JSON.parse(localStorage.getItem('newHouses') || '[]')
-
-        // 合併 API 資料和本地資料
-        const combinedHouses = [...apiHouses, ...newHouses]
-
-        setAllHouses(combinedHouses)
-        setFilteredHouses(combinedHouses)
-        setSortedHouses(combinedHouses)
-        console.log('房屋列表載入成功，共', combinedHouses.length, '筆資料')
+        setAllHouses(apiHouses)
+        setFilteredHouses(apiHouses)
+        setSortedHouses(apiHouses)
+        console.log('房屋列表載入成功，共', apiHouses.length, '筆資料')
       } catch (error) {
         console.error('獲取房屋列表失敗:', error)
         setError('無法載入房屋資料，請稍後再試')
-
-        // 發生錯誤時，僅使用 localStorage 的資料作為備用
-        const newHouses = JSON.parse(localStorage.getItem('newHouses') || '[]')
-        setAllHouses(newHouses)
-        setFilteredHouses(newHouses)
-        setSortedHouses(newHouses)
       } finally {
         setLoading(false)
       }
@@ -114,6 +101,13 @@ export default function HomePage() {
       // 物件類型篩選
       if (filters.type) {
         result = result.filter((house) => house.house_type === filters.type)
+      }
+
+      // 刊登類型篩選
+      if (filters.listing_type) {
+        result = result.filter(
+          (house) => house.listing_type === filters.listing_type
+        )
       }
 
       console.log('篩選結果:', result.length, '筆資料')

@@ -57,7 +57,8 @@ export default function RelatedHouses({
                   {house.title}
                 </h3>
                 <span className="text-primary-600 font-bold text-lg">
-                  {house.price}萬
+                  {house.price}
+                  {house.listing_type === '出租' ? '元/月' : '萬'}
                 </span>
               </div>
 

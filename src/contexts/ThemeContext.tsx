@@ -2,32 +2,30 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { api } from '@/services/apiService' // 引入我們之前建立的 api 服務
+import { useThemeConfig } from './SystemContext'
 import { hexToHsl } from '@/utils/colorUtils'
 import tinycolor from 'tinycolor2'
-
-// 定義主題的結構
-interface Theme {
-  primary: string // HEX format, e.g., "#ea580c"
-  gradient_main: string
-  gradient_mid: string
-  gradient_sub: string
-}
 
 const ThemeContext = createContext({})
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
+  const themeConfig = useThemeConfig()
 
   useEffect(() => {
-    const fetchAndApplyTheme = async () => {
+    const applyTheme = () => {
+      if (!themeConfig) {
+        setIsLoading(false)
+        return
+      }
+
       try {
-        // 假設 API 回傳三個 HEX 色碼
+        // 構建主題物件
         const themeFromApi = {
-          primary: '#ea580c',
-          gradient_main: '#ea580c', // 深藍色
-          gradient_mid: '#3A506B', // 淡紫色
-          gradient_sub: '#1F2937', // 淡粉色
+          primary: themeConfig.primary,
+          gradient_main: themeConfig.gradient_main,
+          gradient_mid: themeConfig.gradient_mid,
+          gradient_sub: themeConfig.gradient_sub,
         }
         // 主色處理
         const baseColor = tinycolor(themeFromApi.primary)
@@ -83,8 +81,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    fetchAndApplyTheme()
-  }, [])
+    applyTheme()
+  }, [themeConfig])
 
   // 這個 Provider 的主要工作是觸發 effect，也可以選擇性地傳遞 isLoading 狀態
   return (

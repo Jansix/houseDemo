@@ -33,6 +33,24 @@ export interface UpdateUserProfileData {
   active?: boolean
 }
 
+// 系統設定項目型別
+export interface SystemSetting {
+  type: string
+  value: string
+}
+
+// 網站設定型別
+export interface SiteSettings {
+  title: string
+  logo: string
+  primaryColor: string
+  gradientMain: string
+  gradientMid: string
+  gradientSub: string
+  lineUrl: string
+  whatsappUrl: string
+}
+
 export const managerService = {
   /**
    * 獲取使用者列表
@@ -65,7 +83,7 @@ export const managerService = {
    * @returns Promise<void>
    */
   deleteUser: async (userId: string): Promise<void> => {
-    return api.del<void>(`/service/manager/${userId}/user`, {
+    return api.del<void>(`/service/manager/${userId}/user`, null, {
       auth: true,
     })
   },
@@ -130,5 +148,134 @@ export const managerService = {
         'Content-Type': 'multipart/form-data',
       },
     })
+  },
+
+  /**
+   * 獲取系統設定列表
+   * @returns Promise<SystemSetting[]> 系統設定列表
+   */
+  getSystemSettings: async (): Promise<SystemSetting[]> => {
+    return api.get<SystemSetting[]>(
+      '/service/manager/system/list',
+      {},
+      {
+        auth: true,
+      }
+    )
+  },
+
+  /**
+   * 解析系統設定為網站設定格式
+   * @param settings 系統設定列表
+   * @returns SiteSettings 網站設定物件
+   */
+  parseSystemSettings: (settings: SystemSetting[]): SiteSettings => {
+    const settingsMap = settings.reduce((acc, setting) => {
+      acc[setting.type] = setting.value
+      return acc
+    }, {} as Record<string, string>)
+
+    // 解析漸層顏色
+    const gradientColors = settingsMap.web_color_gradient?.split(',') || [
+      '#EA5234',
+      '#3A506B',
+      '#1F2937',
+    ]
+
+    return {
+      title: settingsMap.web_title || '房屋網',
+      logo: settingsMap.web_logo || '',
+      primaryColor: settingsMap.web_color || '#EA5234',
+      gradientMain: gradientColors[0] || '#EA5234',
+      gradientMid: gradientColors[1] || '#3A506B',
+      gradientSub: gradientColors[2] || '#1F2937',
+      lineUrl: settingsMap.line_url || '',
+      whatsappUrl: settingsMap.whatsapp_url || '',
+    }
+  },
+
+  /**
+   * 更新單一系統設定參數
+   * @param type 設定類型
+   * @param value 設定值
+   * @param image 圖片文件 (可選)
+   * @returns Promise<void>
+   */
+  updateSystemParameter: async (
+    type: string,
+    value: string,
+    image?: File
+  ): Promise<void> => {
+    const formData = new FormData()
+    formData.append('type', type)
+    formData.append('value', value)
+
+    if (image) {
+      formData.append('image', image)
+    }
+
+    return api.patch<void>('/service/manager/system/parameter', formData, {
+      auth: true,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+
+  /**
+   * 批量更新系統設定
+   * @param currentSettings 當前設定
+   * @param originalSettings 原始設定
+   * @param logoFile Logo 圖片文件 (可選)
+   * @returns Promise<void>
+   */
+  updateSystemSettings: async (
+    currentSettings: SiteSettings,
+    originalSettings: SiteSettings,
+    logoFile?: File
+  ): Promise<void> => {
+    const updates: Array<{ type: string; value: string; image?: File }> = []
+
+    // 檢查每個欄位是否有變更
+    if (currentSettings.title !== originalSettings.title) {
+      updates.push({ type: 'web_title', value: currentSettings.title })
+    }
+
+    if (currentSettings.logo !== originalSettings.logo || logoFile) {
+      updates.push({
+        type: 'web_logo',
+        value: currentSettings.logo,
+        image: logoFile,
+      })
+    }
+
+    if (currentSettings.primaryColor !== originalSettings.primaryColor) {
+      updates.push({ type: 'web_color', value: currentSettings.primaryColor })
+    }
+
+    // 檢查漸層顏色是否有變更
+    const currentGradient = `${currentSettings.gradientMain},${currentSettings.gradientMid},${currentSettings.gradientSub}`
+    const originalGradient = `${originalSettings.gradientMain},${originalSettings.gradientMid},${originalSettings.gradientSub}`
+
+    if (currentGradient !== originalGradient) {
+      updates.push({ type: 'web_color_gradient', value: currentGradient })
+    }
+
+    if (currentSettings.lineUrl !== originalSettings.lineUrl) {
+      updates.push({ type: 'line_url', value: currentSettings.lineUrl })
+    }
+
+    if (currentSettings.whatsappUrl !== originalSettings.whatsappUrl) {
+      updates.push({ type: 'whatsapp_url', value: currentSettings.whatsappUrl })
+    }
+
+    // 依次更新每個變更的設定
+    for (const update of updates) {
+      await managerService.updateSystemParameter(
+        update.type,
+        update.value,
+        update.image
+      )
+    }
   },
 }

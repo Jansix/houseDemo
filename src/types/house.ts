@@ -4,6 +4,7 @@
 export interface BaseHouseData {
   title: string
   price: number
+  previous_price?: number // 上次價格，用於簡單對比
   addr: string
   area: number
   rooms: number
@@ -47,6 +48,7 @@ export interface House extends BaseHouseData {
   updated: string
   // 聯絡資訊 (可選)
   contact?: {
+    avatar?: string
     name: string
     phone: string
   }
@@ -56,6 +58,7 @@ export interface House extends BaseHouseData {
 export interface PublishFormData {
   title: string
   price: number
+  previous_price?: number // 上次價格，用於簡單對比
   addr: string
   area: number
   rooms: number
@@ -86,6 +89,7 @@ export interface PublishFormData {
   imagesBase64?: string[] // Base64 格式的圖片列表
   // 聯絡資訊 (可選)
   contact?: {
+    avatar?: string
     name: string
     phone: string
   }
@@ -96,6 +100,7 @@ export interface HouseCard {
   house_id: string
   title: string
   price: number
+  previous_price?: number // 上次價格，用於簡單對比
   addr: string
   area: number
   rooms: number
@@ -118,6 +123,7 @@ export interface SearchFilters {
   maxArea: number
   rooms: string
   type: string
+  listing_type: string
 }
 
 // 房屋篩選條件 - 簡化版本用於其他組件

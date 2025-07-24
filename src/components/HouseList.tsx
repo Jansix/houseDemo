@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { House } from '@/types/house'
-import config from '@/data/config'
+import PriceComparison from './PriceComparison'
 
 interface HouseCardProps {
   house: House
@@ -38,10 +38,13 @@ function HouseCard({ house }: HouseCardProps) {
             <span>房屋圖片</span>
           </div>
           {/* 價格標籤 */}
-          <div
-            className={`absolute top-3 right-3 bg-primary-600 text-white px-3 py-1 rounded-full font-bold`}
-          >
-            {house.price}萬
+          <div className="absolute top-3 right-3">
+            <PriceComparison
+              currentPrice={house.price}
+              previousPrice={house.previous_price}
+              listingType={house.listing_type}
+              variant="compact"
+            />
           </div>
         </div>
 
@@ -80,7 +83,7 @@ function HouseCard({ house }: HouseCardProps) {
               house.features.slice(0, 3).map((feature, index) => (
                 <span
                   key={index}
-                  className="inline-block bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs"
+                  className="inline-block bg-primary-200 text-white px-2 py-1 rounded text-xs"
                 >
                   {feature}
                 </span>

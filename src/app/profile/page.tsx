@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react'
 import PrivateRoute from '@/components/PrivateRoute'
 import { useAuth } from '@/contexts/AuthContext'
 import { authService } from '@/services/authService'
-import config from '@/data/config'
 
 export default function ProfilePage() {
   const { user, setUser } = useAuth()
@@ -12,6 +11,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>('')
+  const [phoneError, setPhoneError] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [editForm, setEditForm] = useState({
@@ -29,11 +29,43 @@ export default function ProfilePage() {
         department: user.department || '',
       })
       setPreviewUrl(user.avatar || '')
+      setPhoneError('') // 清除錯誤狀態
     }
   }, [user])
 
+  // 清理預覽 URL 以避免記憶體洩漏
+  useEffect(() => {
+    return () => {
+      if (selectedFile && previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    }
+  }, [selectedFile, previewUrl])
+
   const handleInputChange = (field: string, value: string) => {
     setEditForm((prev) => ({ ...prev, [field]: value }))
+
+    // 電話號碼實時驗證
+    if (field === 'phone') {
+      if (value === '') {
+        setPhoneError('')
+      } else {
+        const phoneRegex = /^09\d{8}$/
+        if (!phoneRegex.test(value)) {
+          if (value.length < 10) {
+            setPhoneError('電話號碼必須是10碼')
+          } else if (value.length > 10) {
+            setPhoneError('電話號碼不能超過10碼')
+          } else if (!value.startsWith('09')) {
+            setPhoneError('電話號碼必須以09開頭')
+          } else {
+            setPhoneError('電話號碼格式不正確')
+          }
+        } else {
+          setPhoneError('')
+        }
+      }
+    }
   }
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +97,25 @@ export default function ProfilePage() {
     }
   }
 
+  const validateForm = () => {
+    // 電話號碼驗證：必須是09開頭的10碼數字（如果有輸入的話）
+    if (editForm.phone && editForm.phone.trim() !== '') {
+      const phoneRegex = /^09\d{8}$/
+      if (!phoneRegex.test(editForm.phone)) {
+        alert('請檢查電話號碼格式：必須是09開頭的10碼數字')
+        return false
+      }
+    }
+
+    return true
+  }
+
   const handleSave = async () => {
+    // 先驗證表單
+    if (!validateForm()) {
+      return
+    }
+
     setIsLoading(true)
     try {
       // 使用 FormData 來支援檔案上傳
@@ -78,10 +128,27 @@ export default function ProfilePage() {
         formData.append('avatar', selectedFile)
       }
 
-      const updatedUser = await authService.updateProfileWithFormData(formData)
+      // 更新資料
+      await authService.updateProfileWithFormData(formData)
+
+      // 重新從後端獲取最新的用戶資訊
+      const updatedProfile = await authService.getProfile()
+      const updatedUser = {
+        username: updatedProfile.username,
+        phone: updatedProfile.phone,
+        avatar: updatedProfile.avatar,
+        department: updatedProfile.department,
+        level: updatedProfile.level,
+      }
+
       setUser(updatedUser) // 更新使用者資料到 context
       setIsEditing(false)
+      // 清理預覽 URL
+      if (selectedFile && previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
       setSelectedFile(null)
+      setPhoneError('') // 清除錯誤狀態
       alert('個人資料更新成功！')
     } catch (error) {
       console.error('更新失敗:', error)
@@ -99,8 +166,13 @@ export default function ProfilePage() {
         department: user.department || '',
       })
       setPreviewUrl(user.avatar || '')
+      // 清理預覽 URL 以避免記憶體洩漏
+      if (selectedFile && previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
       setSelectedFile(null)
     }
+    setPhoneError('')
     setIsEditing(false)
   }
 
@@ -128,8 +200,8 @@ export default function ProfilePage() {
                   </button>
                   <button
                     onClick={handleSave}
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 disabled:opacity-50"
+                    disabled={isLoading || phoneError !== ''}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? '儲存中...' : '儲存'}
                   </button>
@@ -150,11 +222,15 @@ export default function ProfilePage() {
                     onClick={handleAvatarClick}
                   >
                     <img
-                      src={previewUrl || user.avatar || '/house1.png'}
+                      src={
+                        selectedFile
+                          ? previewUrl
+                          : `https://house_demo.codychen.me${user.avatar}`
+                      }
                       alt="使用者頭像"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.src = '/house1.png'
+                        e.currentTarget.src = '/ly_logo.png' // 預設頭像
                       }}
                     />
                   </div>
@@ -248,15 +324,30 @@ export default function ProfilePage() {
                     電話號碼
                   </label>
                   {isEditing ? (
-                    <input
-                      type="tel"
-                      value={editForm.phone}
-                      onChange={(e) =>
-                        handleInputChange('phone', e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="請輸入電話號碼"
-                    />
+                    <div>
+                      <input
+                        type="tel"
+                        value={editForm.phone}
+                        onChange={(e) =>
+                          handleInputChange('phone', e.target.value)
+                        }
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                          phoneError
+                            ? 'border-red-300 focus:ring-red-500'
+                            : 'border-gray-300 focus:ring-primary-500'
+                        }`}
+                        placeholder="請輸入電話號碼（09開頭10碼）"
+                        maxLength={10}
+                      />
+                      {phoneError && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {phoneError}
+                        </p>
+                      )}
+                      <p className="mt-1 text-xs text-gray-500">
+                        格式：09XXXXXXXX（選填）
+                      </p>
+                    </div>
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-lg text-gray-900">
                       {user.phone || '未設定'}

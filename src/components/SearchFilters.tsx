@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useTwCitySelector } from '@/hooks/useTwCitySelector'
 import type { SearchFilters } from '@/types/house'
-import config from '@/data/config'
 
 interface SearchFiltersProps {
   onSearch: (filters: SearchFilters) => void
@@ -21,6 +20,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
     maxArea: 0,
     rooms: '',
     type: '',
+    listing_type: '',
   })
 
   const handleFilterChange = (
@@ -52,6 +52,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
       maxArea: 0,
       rooms: '',
       type: '',
+      listing_type: '',
     }
     setFilters(resetFilters)
     onSearch(resetFilters)
@@ -61,15 +62,28 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
     <div className="bg-white rounded-lg shadow-md p-6 mb-6 text-gray-900">
       <h2 className="text-xl font-bold text-gray-800 mb-4">搜尋條件</h2>
 
-      {/* 關鍵字搜尋 */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="請輸入關鍵字（地址、標題等）"
-          value={filters.keyword}
-          onChange={(e) => handleFilterChange('keyword', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-        />
+      {/* 關鍵字搜尋和刊登類型 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <input
+            type="text"
+            placeholder="請輸入關鍵字（地址、標題等）"
+            value={filters.keyword}
+            onChange={(e) => handleFilterChange('keyword', e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+        </div>
+        <div>
+          <select
+            value={filters.listing_type}
+            onChange={(e) => handleFilterChange('listing_type', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          >
+            <option value="">所有類型</option>
+            <option value="販售">🏠 販售</option>
+            <option value="出租">🏘️ 出租</option>
+          </select>
+        </div>
       </div>
 
       {/* 地區選擇 */}
@@ -113,11 +127,11 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
         </div>
       </div>
 
-      {/* 售價範圍 */}
+      {/* 價格範圍 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            最低售價 (萬元)
+            最低價格 (萬元/月)
           </label>
           <input
             type="number"
@@ -132,7 +146,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            最高售價 (萬元)
+            最高價格 (萬元/月)
           </label>
           <input
             type="number"

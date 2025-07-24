@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { authService } from '@/services/authService'
 import { useAuth } from '@/contexts/AuthContext'
-import config from '@/data/config'
 
 interface LoginFormData {
   login: string
@@ -24,10 +23,17 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Partial<LoginFormData>>({})
 
-  // 如果已經登入，使用 useEffect 導向首頁
+  // 如果已經登入，使用 useEffect 導向適當頁面
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/')
+      // 檢查是否有儲存的重定向路徑
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin')
+      if (redirectPath) {
+        sessionStorage.removeItem('redirectAfterLogin')
+        router.push(redirectPath)
+      } else {
+        router.push('/')
+      }
     }
   }, [isAuthenticated, router])
 
@@ -103,14 +109,27 @@ export default function LoginPage() {
           phone: profileResponse.phone,
           avatar: profileResponse.avatar,
           department: profileResponse.department,
+          level: profileResponse.level,
         }
 
-        console.log('設定使用者資料到 context:', userProfile)
+        console.log(
+          '設定使用者資料到 context:',
+          userProfile,
+          'Level:',
+          profileResponse.level
+        )
         setUser(userProfile)
 
-        // 導向首頁
-        console.log('登入成功，導向首頁')
-        router.push('/')
+        // 檢查是否有重定向路徑，否則導向首頁
+        const redirectPath = sessionStorage.getItem('redirectAfterLogin')
+        if (redirectPath) {
+          console.log('登入成功，導向原頁面:', redirectPath)
+          sessionStorage.removeItem('redirectAfterLogin')
+          router.push(redirectPath)
+        } else {
+          console.log('登入成功，導向首頁')
+          router.push('/')
+        }
       } else {
         alert('登入失敗，請檢查帳號密碼')
       }
