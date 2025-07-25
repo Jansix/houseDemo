@@ -10,6 +10,10 @@ import PriceComparison from '@/components/PriceComparison'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/contexts/AuthContext'
 
+import dynamic from 'next/dynamic'
+import { MyPDFDocument } from '@/components/MyPDFDocument'
+import { PDFDownloadLink } from '@react-pdf/renderer'
+
 // Swiper imports
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Thumbs, FreeMode } from 'swiper/modules'
@@ -148,40 +152,79 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* 導航麵包屑 */}
-      <nav className="mb-6 text-sm">
-        <Link href="/" className="text-primary-600 hover:text-primary-700">
-          首頁
-        </Link>
-        <span className="mx-2 text-gray-400">&gt;</span>
-        <span className="text-gray-600">房屋</span>
-        <span className="mx-2 text-gray-400">&gt;</span>
-        <span className="text-gray-600">{house.addr.split('市')[0]}市</span>
-        <span className="mx-2 text-gray-400">&gt;</span>
-        <span className="text-gray-600">
-          {house.addr.split('區')[0].split('市')[1]}區
-        </span>
-        <span className="mx-2 text-gray-400">&gt;</span>
-        <span className="text-gray-600">
-          {typeMap[house.house_type] || house.house_type}
-        </span>
-        <span className="mx-2 text-gray-400">&gt;</span>
-        <span className="text-gray-600">
-          {house.price < 1000
-            ? `${house.price}萬以下`
-            : house.price >= 1000 && house.price < 2000
-            ? '1000-2000萬'
-            : house.price >= 2000 && house.price < 3000
-            ? '2000-3000萬'
-            : house.price >= 3000 && house.price < 5000
-            ? '3000-5000萬'
-            : '5000萬以上'}
-        </span>
-        <span className="mx-2 text-gray-400">&gt;</span>
-        <span className="text-primary-600">{house.title}</span>
-      </nav>
+      <div className="flex items-center justify-between mb-4">
+        <nav className="mb-6 text-sm">
+          <Link href="/" className="text-primary-600 hover:text-primary-700">
+            首頁
+          </Link>
+          <span className="mx-2 text-gray-400">&gt;</span>
+          <span className="text-gray-600">房屋</span>
+          <span className="mx-2 text-gray-400">&gt;</span>
+          <span className="text-gray-600">{house.addr.split('市')[0]}市</span>
+          <span className="mx-2 text-gray-400">&gt;</span>
+          <span className="text-gray-600">
+            {house.addr.split('區')[0].split('市')[1]}區
+          </span>
+          <span className="mx-2 text-gray-400">&gt;</span>
+          <span className="text-gray-600">
+            {typeMap[house.house_type] || house.house_type}
+          </span>
+          <span className="mx-2 text-gray-400">&gt;</span>
+          <span className="text-gray-600">
+            {house.price < 1000
+              ? `${house.price}萬以下`
+              : house.price >= 1000 && house.price < 2000
+              ? '1000-2000萬'
+              : house.price >= 2000 && house.price < 3000
+              ? '2000-3000萬'
+              : house.price >= 3000 && house.price < 5000
+              ? '3000-5000萬'
+              : '5000萬以上'}
+          </span>
+          <span className="mx-2 text-gray-400">&gt;</span>
+          <span className="text-primary-600">{house.title}</span>
+        </nav>
+        <div className="flex gap-3">
+          <PDFDownloadLink
+            document={<MyPDFDocument house={house} />}
+            fileName={`${house.title}-房屋資料.pdf`}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+          >
+            {({ blob, url, loading, error }) =>
+              loading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  生成中...
+                </span>
+              ) : (
+                <span className="flex items-center">📄 下載PDF</span>
+              )
+            }
+          </PDFDownloadLink>
+        </div>
+      </div>
 
       {/* 主要內容 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8" id="main-content">
         {/* 左側：圖片和基本資訊 */}
         <div className="lg:col-span-2">
           {/* 圖片輪播 */}
@@ -329,7 +372,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="text-center">
                 <div className="text-xl font-bold text-gray-800">
-                  {house.rooms}房{house.bathrooms}廳{house.bathrooms}衛
+                  {house.rooms}房{house.living_rooms}廳{house.bathrooms}衛
                 </div>
                 <div className="text-sm text-gray-600">格局</div>
               </div>
