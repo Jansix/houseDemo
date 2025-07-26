@@ -24,6 +24,7 @@ export default function AdminPage() {
     gradientMain: '',
     gradientMid: '',
     gradientSub: '',
+    gradientHorizontal: false,
     lineUrl: '',
     whatsappUrl: '',
   })
@@ -36,6 +37,7 @@ export default function AdminPage() {
     gradientMain: '',
     gradientMid: '',
     gradientSub: '',
+    gradientHorizontal: false,
     lineUrl: '',
     whatsappUrl: '',
   })
@@ -221,7 +223,7 @@ export default function AdminPage() {
       phone: user.phone || '',
       department: user.department || '',
       level: user.level,
-      active: true, // 假設預設為啟用，API 需要確認此欄位
+      active: user.active !== undefined ? user.active : true, // 若後端沒給則預設 true
     })
     setAvatarFile(null) // 重置頭像文件
     setShowEditModal(true)
@@ -483,7 +485,7 @@ export default function AdminPage() {
                         placeholder="https://line.me/R/ti/p/@yourlineId"
                       />
                     </div>
-                    {/* 主色系與漸層顏色設定（四欄位） */}
+                    {/* 主色系與漸層顏色設定（五欄位，含方向） */}
                     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* 主色系設定 */}
                       <div>
@@ -608,6 +610,32 @@ export default function AdminPage() {
                             placeholder="#1F2937"
                           />
                         </div>
+                      </div>
+                      {/* 漸層方向 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          漸層方向
+                        </label>
+                        <select
+                          value={
+                            siteSettings.gradientHorizontal
+                              ? 'horizontal'
+                              : 'vertical'
+                          }
+                          onChange={(e) =>
+                            setSiteSettings((prev) => ({
+                              ...prev,
+                              gradientHorizontal:
+                                e.target.value === 'horizontal',
+                            }))
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        >
+                          <option value="horizontal">
+                            橫向 (left → right)
+                          </option>
+                          <option value="vertical">直向 (top → bottom)</option>
+                        </select>
                       </div>
                     </div>
                   </div>

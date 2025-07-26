@@ -17,7 +17,14 @@ const inter = Inter({ subsets: ['latin'] })
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const globalContact = useGlobalContact()
-  const { webTitle, webLogo } = useWebInfo()
+  const webInfo = useWebInfo()
+  const webTitle = webInfo.webTitle
+  const webLogo = webInfo.webLogo
+  // 嘗試從 webInfo 直接取 gradientHorizontal，若不存在則 fallback false
+  let gradientHorizontal = false
+  if ('gradientHorizontal' in webInfo) {
+    gradientHorizontal = Boolean((webInfo as any).gradientHorizontal)
+  }
 
   return (
     <>
@@ -183,8 +190,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         <footer
           className="bg-gradient-to-b from-gradientMain to-gradientSub text-white"
           style={{
-            background:
-              'linear-gradient(to right, hsl(var(--gradient-main)), hsl(var(--gradient-mid)), hsl(var(--gradient-sub)))',
+            background: `linear-gradient(to ${
+              gradientHorizontal ? 'right' : 'bottom'
+            }, hsl(var(--gradient-main)), hsl(var(--gradient-mid)), hsl(var(--gradient-sub)))`,
             boxShadow: '0 -4px 6px rgba(0, 0, 0, 0.1)',
           }}
         >
@@ -203,9 +211,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               <div>
                 <h3 className="text-lg font-bold mb-4">聯絡我們</h3>
                 <ul className="space-y-2 text-gray-300">
-                  <li>📞 客服專線：02-1234-5678</li>
-                  <li>✉️ 信箱：service@999demo.com</li>
-                  <li>⏰ 服務時間：週一至週五 9:00-18:00</li>
+                  <li>📞 客服專線: (02) 8521-1068</li>
+                  <li>公司名稱: 隆悅不動產經紀公司</li>
+                  {/* <li>✉️ 信箱：service@999demo.com</li>
+                  <li>⏰ 服務時間：週一至週五 9:00-18:00</li> */}
                 </ul>
               </div>
             </div>

@@ -21,6 +21,7 @@ interface SystemContextType {
   themeConfig: ThemeConfig | null
   webTitle: string
   webLogo: string
+  gradientHorizontal?: boolean
   isLoading: boolean
   error: string | null
   refetch: () => Promise<void>
@@ -81,6 +82,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     themeConfig: settings?.themeConfig || null,
     webTitle: settings?.webTitle || '',
     webLogo: settings?.webLogo || '',
+    gradientHorizontal: settings?.gradientHorizontal ?? false,
     isLoading,
     error,
     refetch: fetchSystemSettings,
@@ -114,6 +116,6 @@ export function useThemeConfig() {
 }
 
 export function useWebInfo() {
-  const { webTitle, webLogo } = useSystem()
-  return { webTitle, webLogo }
+  const { webTitle, webLogo, gradientHorizontal } = useSystem()
+  return { webTitle, webLogo, gradientHorizontal }
 }

@@ -20,7 +20,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
     maxArea: 0,
     rooms: '',
     type: '',
-    listing_type: '',
+    listing_type: '販售', // 預設為販售
   })
 
   const handleFilterChange = (
@@ -52,7 +52,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
       maxArea: 0,
       rooms: '',
       type: '',
-      listing_type: '',
+      listing_type: '販售', // 重設時也預設為販售
     }
     setFilters(resetFilters)
     onSearch(resetFilters)
@@ -79,7 +79,6 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
             onChange={(e) => handleFilterChange('listing_type', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value="">所有類型</option>
             <option value="販售">🏠 販售</option>
             <option value="出租">🏘️ 出租</option>
           </select>
@@ -131,11 +130,12 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            最低價格 (萬元/月)
+            最低價格 ({filters.listing_type === '出租' ? '元/月' : '萬元'})
           </label>
           <input
             type="number"
             placeholder="0"
+            min="0"
             value={filters.minPrice || ''}
             onChange={(e) =>
               handleFilterChange('minPrice', parseInt(e.target.value) || 0)
@@ -146,11 +146,12 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            最高價格 (萬元/月)
+            最高價格 ({filters.listing_type === '出租' ? '元/月' : '萬元'})
           </label>
           <input
             type="number"
             placeholder="不限"
+            min="0"
             value={filters.maxPrice || ''}
             onChange={(e) =>
               handleFilterChange('maxPrice', parseInt(e.target.value) || 0)
@@ -169,6 +170,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
           <input
             type="number"
             placeholder="0"
+            min="0"
             value={filters.minArea || ''}
             onChange={(e) =>
               handleFilterChange('minArea', parseInt(e.target.value) || 0)
@@ -184,6 +186,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
           <input
             type="number"
             placeholder="不限"
+            min="0"
             value={filters.maxArea || ''}
             onChange={(e) =>
               handleFilterChange('maxArea', parseInt(e.target.value) || 0)
@@ -223,9 +226,18 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="">不限</option>
+            <option value="廠房">廠房</option>
+            <option value="土地">土地</option>
+            <option value="廠辦">廠辦</option>
+            <option value="農舍">農舍</option>
+            <option value="店面">店面</option>
+            <option value="透天別墅">透天別墅</option>
+            <option value="辦公大樓">辦公大樓</option>
+            <option value="套房">套房</option>
+            <option value="華廈">華廈</option>
             <option value="公寓">公寓</option>
-            <option value="透天">透天</option>
-            <option value="別墅">別墅</option>
+            <option value="電梯大樓">電梯大樓</option>
+            <option value="其它">其它</option>
           </select>
         </div>
       </div>

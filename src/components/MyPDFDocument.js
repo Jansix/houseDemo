@@ -6,8 +6,8 @@ import {
   View,
   StyleSheet,
   Font,
+  Image,
 } from '@react-pdf/renderer'
-import { Image } from '@react-pdf/renderer'
 
 // 1. 確保字體已註冊且路徑正確
 Font.register({
@@ -26,7 +26,6 @@ const styles = StyleSheet.create({
 
   // 主標題區域 - 模仿網頁頂部
   headerSection: {
-    backgroundColor: '#ffffff',
     borderRadius: 4,
     padding: 12,
     marginBottom: 8,
@@ -99,7 +98,6 @@ const styles = StyleSheet.create({
 
   // 卡片樣式
   card: {
-    backgroundColor: '#ffffff',
     borderRadius: 4,
     padding: 10,
     marginBottom: 8,
@@ -110,7 +108,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 10,
     fontWeight: 'bold',
-    marginBottom: 6,
+    marginBottom: 8,
     color: '#374151',
     fontFamily: 'Noto Sans TC',
   },
@@ -123,26 +121,27 @@ const styles = StyleSheet.create({
   },
 
   basicInfoItem: {
-    width: '50%',
+    width: '25%',
     textAlign: 'center',
+    marginBottom: 6,
+    paddingHorizontal: 2,
   },
 
   basicInfoValue: {
-    fontSize: 12,
+    fontSize: 9,
     fontWeight: 'bold',
     color: '#1f2937',
     marginBottom: 2,
   },
 
   basicInfoLabel: {
-    marginTop: 4,
     fontSize: 6,
     color: '#6b7280',
   },
 
   // 詳細資料表格
   detailTable: {
-    marginBottom: 2,
+    marginBottom: 6,
   },
 
   detailRow: {
@@ -222,10 +221,28 @@ const styles = StyleSheet.create({
     lineHeight: 1.4,
     textAlign: 'justify',
   },
+  // descriptionBox 樣式移除，改用程式邏輯控制顯示行數
+
+  // 圖片樣式
+  imageContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    padding: 4,
+  },
+
+  houseImage: {
+    width: '48%',
+    height: 120,
+    objectFit: 'cover',
+    borderRadius: 4,
+  },
 
   // 右側欄樣式
   priceCard: {
-    backgroundColor: '#ffffff',
     borderRadius: 4,
     padding: 10,
     marginBottom: 8,
@@ -238,7 +255,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#dc2626',
-    marginBottom: 6,
+    marginBottom: 8,
   },
 
   rightSidePriceDetail: {
@@ -303,7 +320,7 @@ const styles = StyleSheet.create({
   },
 })
 
-export const MyPDFDocument = ({ house }) => {
+export const MyPDFDocument = ({ house, imageUrl }) => {
   if (!house) {
     return (
       <Document>
@@ -334,7 +351,7 @@ export const MyPDFDocument = ({ house }) => {
         {/* 標題區域 - 模仿網頁頭部 */}
         <View style={styles.headerSection}>
           <Text style={styles.title}>{house.title}</Text>
-          <Text style={styles.address}> {house.addr}</Text>
+          <Text style={styles.address}>{house.addr}</Text>
           <View style={styles.priceSection}>
             <Text style={styles.mainPrice}>
               {house.listing_type === '出租'
@@ -358,7 +375,7 @@ export const MyPDFDocument = ({ house }) => {
         <View style={styles.twoColumnContainer}>
           {/* 左欄 - 主要內容 */}
           <View style={styles.leftColumn}>
-            {/* 房屋基本資訊 - 模仿網頁卡片 */}
+            {/* 房屋圖片 */}
             <View style={styles.card}>
               <Text style={styles.cardTitle}>房屋基本資訊</Text>
               <View style={styles.basicInfoGrid}>
@@ -369,7 +386,7 @@ export const MyPDFDocument = ({ house }) => {
                   <Text style={styles.basicInfoLabel}>格局</Text>
                 </View>
                 <View style={styles.basicInfoItem}>
-                  <Text style={styles.basicInfoValue}>{house.area}</Text>
+                  <Text style={styles.basicInfoValue}>{house.area}坪</Text>
                   <Text style={styles.basicInfoLabel}>坪數</Text>
                 </View>
                 <View style={styles.basicInfoItem}>
@@ -389,11 +406,14 @@ export const MyPDFDocument = ({ house }) => {
               </View>
             </View>
 
-            <View style={styles.card}>
-              <div style={{ height: '170px', backgroundColor: '#f0f0f0' }}>
-                內容
-              </div>
-            </View>
+            {/* 房屋圖片 */}
+            {Array.isArray(imageUrl) && imageUrl.length > 0 && (
+              <View style={styles.imageContainer}>
+                {imageUrl.slice(0, 2).map((img, idx) => (
+                  <Image key={idx} style={styles.houseImage} src={img} />
+                ))}
+              </View>
+            )}
 
             {/* 房屋詳細資料 */}
             <View style={styles.card}>
@@ -447,11 +467,19 @@ export const MyPDFDocument = ({ house }) => {
             {/* 屋況特色 */}
             <View style={styles.card}>
               <Text style={styles.cardTitle}>屋況特色</Text>
-              <Text style={styles.description}>
-                {house.description.length > 150
-                  ? `${house.description.substring(0, 150)}...`
-                  : house.description}
-              </Text>
+              {(() => {
+                // 將描述每 45 字切一行，僅顯示前 3 行
+                const desc =
+                  house.description.length > 150
+                    ? `${house.description.substring(0, 150)}...`
+                    : house.description
+                const lines = desc.match(/.{1,48}/g) || []
+                return lines.slice(0, 3).map((line, idx) => (
+                  <Text key={idx} style={styles.description}>
+                    {line}
+                  </Text>
+                ))
+              })()}
             </View>
 
             {/* 周邊機能 */}
@@ -462,7 +490,7 @@ export const MyPDFDocument = ({ house }) => {
                   <View style={styles.facilityItem}>
                     <Text style={styles.facilityTitle}>學區</Text>
                     <Text style={styles.facilityText}>
-                      {house.schools?.join('、')}
+                      {house.schools.slice(0, 2).join('、')}
                     </Text>
                   </View>
                 )}
@@ -471,7 +499,7 @@ export const MyPDFDocument = ({ house }) => {
                     <View style={styles.facilityItem}>
                       <Text style={styles.facilityTitle}>熱門商圈</Text>
                       <Text style={styles.facilityText}>
-                        {house.commercial_areas?.join('、')}
+                        {house.commercial_areas.slice(0, 2).join('、')}
                       </Text>
                     </View>
                   )}
@@ -479,7 +507,7 @@ export const MyPDFDocument = ({ house }) => {
                   <View style={styles.facilityItem}>
                     <Text style={styles.facilityTitle}>超商/賣場</Text>
                     <Text style={styles.facilityText}>
-                      {house.stores?.join('、')}
+                      {house.stores.slice(0, 2).join('、')}
                     </Text>
                   </View>
                 )}
@@ -487,7 +515,7 @@ export const MyPDFDocument = ({ house }) => {
                   <View style={styles.facilityItem}>
                     <Text style={styles.facilityTitle}>醫療機構</Text>
                     <Text style={styles.facilityText}>
-                      {house.medical?.join('、')}
+                      {house.medical.slice(0, 2).join('、')}
                     </Text>
                   </View>
                 )}
@@ -495,15 +523,15 @@ export const MyPDFDocument = ({ house }) => {
                   <View style={styles.facilityItem}>
                     <Text style={styles.facilityTitle}>傳統市場</Text>
                     <Text style={styles.facilityText}>
-                      {house.markets?.join('、')}
+                      {house.markets.slice(0, 2).join('、')}
                     </Text>
                   </View>
                 )}
                 {house.government && house.government.length > 0 && (
                   <View style={styles.facilityItem}>
-                    <Text style={styles.facilityTitle}>政府機構</Text>
+                    <Text style={styles.facilityTitle}>政府機關</Text>
                     <Text style={styles.facilityText}>
-                      {house.government?.join('、')}
+                      {house.government.slice(0, 2).join('、')}
                     </Text>
                   </View>
                 )}
@@ -511,16 +539,16 @@ export const MyPDFDocument = ({ house }) => {
                   <View style={styles.facilityItem}>
                     <Text style={styles.facilityTitle}>其他配套</Text>
                     <Text style={styles.facilityText}>
-                      {house.others?.join('、')}
+                      {house.others.slice(0, 2).join('、')}
                     </Text>
                   </View>
                 )}
                 {house.public_facilities &&
                   house.public_facilities.length > 0 && (
                     <View style={styles.facilityItem}>
-                      <Text style={styles.facilityTitle}>公共建設</Text>
+                      <Text style={styles.facilityTitle}>公共設施</Text>
                       <Text style={styles.facilityText}>
-                        {house.public_facilities?.join('、')}
+                        {house.public_facilities.slice(0, 2).join('、')}
                       </Text>
                     </View>
                   )}
@@ -555,6 +583,20 @@ export const MyPDFDocument = ({ house }) => {
             {house.contact && (
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>聯絡資訊</Text>
+                {house.contact.avatar_64 && (
+                  <View style={{ alignItems: 'center', marginBottom: 6 }}>
+                    <Image
+                      src={house.contact.avatar_64}
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        marginBottom: 4,
+                        objectFit: 'cover',
+                      }}
+                    />
+                  </View>
+                )}
                 <View style={styles.contactInfo}>
                   <Text style={styles.contactName}>{house.contact.name}</Text>
                   {house.contact.phone && (

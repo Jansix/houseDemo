@@ -31,7 +31,7 @@ function PublishContent({ editHouseId }: { editHouseId: string | null }) {
     total_floor: '',
     current_floor: '',
     age: '',
-    house_type: '公寓',
+    house_type: '請選擇',
     listing_type: '販售',
     description: '',
     introduction: '',
@@ -109,8 +109,8 @@ function PublishContent({ editHouseId }: { editHouseId: string | null }) {
                   | '豪華裝潢'
                   | '頂級豪華裝潢')
               : '簡單裝潢',
-            unit: ['公寓', '社區', '華夏', '獨棟'].includes(houseData.unit)
-              ? (houseData.unit as '公寓' | '社區' | '華夏' | '獨棟')
+            unit: ['公寓', '社區', '華廈', '獨棟'].includes(houseData.unit)
+              ? (houseData.unit as '公寓' | '社區' | '華廈' | '獨棟')
               : '公寓',
             schools: houseData.schools || [],
             commercial_areas: houseData.commercial_areas || [],
@@ -643,7 +643,7 @@ function PublishContent({ editHouseId }: { editHouseId: string | null }) {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="請輸入房間數"
-                  min="1"
+                  min="0"
                   required
                 />
               </div>
@@ -681,7 +681,7 @@ function PublishContent({ editHouseId }: { editHouseId: string | null }) {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="請輸入衛浴數"
-                  min="1"
+                  min="0"
                   required
                 />
               </div>
@@ -717,7 +717,7 @@ function PublishContent({ editHouseId }: { editHouseId: string | null }) {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="請輸入當前樓層（獨棟請填0）"
-                  min="0"
+                  min="1"
                 />
               </div>
 
@@ -749,15 +749,38 @@ function PublishContent({ editHouseId }: { editHouseId: string | null }) {
                   onChange={(e) =>
                     handleInputChange(
                       'house_type',
-                      e.target.value as '公寓' | '透天' | '別墅'
+                      e.target.value as
+                        | '請選擇'
+                        | '廠房'
+                        | '土地'
+                        | '廠辦'
+                        | '農舍'
+                        | '店面'
+                        | '透天別墅'
+                        | '辦公大樓'
+                        | '套房'
+                        | '華廈'
+                        | '公寓'
+                        | '電梯大樓'
+                        | '其它'
                     )
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   required
                 >
+                  <option value="請選擇">請選擇</option>
+                  <option value="廠房">廠房</option>
+                  <option value="土地">土地</option>
+                  <option value="廠辦">廠辦</option>
+                  <option value="農舍">農舍</option>
+                  <option value="店面">店面</option>
+                  <option value="透天別墅">透天別墅</option>
+                  <option value="辦公大樓">辦公大樓</option>
+                  <option value="套房">套房</option>
+                  <option value="華廈">華廈</option>
                   <option value="公寓">公寓</option>
-                  <option value="透天">透天</option>
-                  <option value="別墅">別墅</option>
+                  <option value="電梯大樓">電梯大樓</option>
+                  <option value="其它">其它</option>
                 </select>
               </div>
 
@@ -886,7 +909,7 @@ function PublishContent({ editHouseId }: { editHouseId: string | null }) {
                   onChange={(e) =>
                     handleInputChange(
                       'unit',
-                      e.target.value as '公寓' | '社區' | '華夏' | '獨棟'
+                      e.target.value as '公寓' | '社區' | '華廈' | '獨棟'
                     )
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -894,7 +917,7 @@ function PublishContent({ editHouseId }: { editHouseId: string | null }) {
                 >
                   <option value="公寓">公寓</option>
                   <option value="社區">社區</option>
-                  <option value="華夏">華夏</option>
+                  <option value="華廈">華廈</option>
                   <option value="獨棟">獨棟</option>
                 </select>
               </div>

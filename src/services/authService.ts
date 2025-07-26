@@ -51,6 +51,7 @@ export interface SystemSettings {
   webLogo: string
   globalContact: GlobalContact
   themeConfig: ThemeConfig
+  gradientHorizontal?: boolean
 }
 
 export const authService = {
@@ -109,8 +110,12 @@ export const systemService = {
       configs.find((c) => c.type === 'web_color_gradient')?.value ||
       '#ea580c,#3A506B,#1F2937'
 
-    // 解析漸層顏色
-    const gradientColors = webColorGradient.split(',')
+    // 解析漸層顏色與方向
+    const gradientParts = webColorGradient.split(',')
+    const gradientColors = gradientParts.slice(0, 3)
+    // 方向布林值（第4個值，若存在且為 'true' 則為 true，否則 false）
+    const gradientHorizontal =
+      gradientParts.length > 3 ? gradientParts[3] === 'true' : false
 
     return {
       webTitle,
@@ -125,6 +130,7 @@ export const systemService = {
         gradient_mid: gradientColors[1] || '#3A506B',
         gradient_sub: gradientColors[2] || '#1F2937',
       },
+      gradientHorizontal,
     }
   },
 

@@ -43,12 +43,12 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
   const router = useRouter()
   const { user } = useAuth()
   const [house, setHouse] = useState<House | null>(null)
-  const [allHouses, setAllHouses] = useState<House[]>([])
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [showCheckModal, setShowCheckModal] = useState(false)
+  const [imageBase64List, setImageBase64List] = useState<string[]>([])
 
   // 處理圖片 URL，確保是完整的 URL
   const getFullImageUrl = (imageUrl: string) => {
@@ -67,6 +67,42 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
         // 從 API 獲取房屋詳情
         const houseData = await houseService.getHouseInfo(params.id)
         setHouse(houseData)
+
+        // 轉換前兩張圖片為 base64
+        if (houseData?.images && houseData.images.length > 0) {
+          const imagePromises = houseData.images
+            .slice(0, 2)
+            .map(async (image, index) => {
+              try {
+                const fullUrl = image.startsWith('http')
+                  ? image
+                  : `https://house_demo.codychen.me${
+                      image.startsWith('/') ? '' : '/'
+                    }${image}`
+
+                const res = await fetch(fullUrl)
+                const blob = await res.blob()
+                const reader = new window.FileReader()
+
+                return new Promise<string>((resolve, reject) => {
+                  reader.onloadend = () => {
+                    resolve(reader.result as string)
+                  }
+                  reader.onerror = reject
+                  reader.readAsDataURL(blob)
+                })
+              } catch (err) {
+                console.error(
+                  `Failed to convert image ${index} to base64:`,
+                  err
+                )
+                return null
+              }
+            })
+
+          const base64Results = await Promise.all(imagePromises)
+          setImageBase64List(base64Results.filter(Boolean) as string[])
+        }
       } catch (error) {
         console.error('獲取房屋資料失敗:', error)
         setHouse(null)
@@ -186,7 +222,9 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
         </nav>
         <div className="flex gap-3">
           <PDFDownloadLink
-            document={<MyPDFDocument house={house} />}
+            document={
+              <MyPDFDocument house={house} imageUrl={imageBase64List as any} />
+            }
             fileName={`${house.title}-房屋資料.pdf`}
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
           >
@@ -679,7 +717,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
                       {(house.price * 2).toLocaleString()}元
                     </span>
                   </div>
-                  <div className="flex justify-between">
+                  {/* <div className="flex justify-between">
                     <span className="text-gray-600">年租金總額</span>
                     <span className="font-medium">
                       {(house.price * 12).toLocaleString()}元
@@ -691,7 +729,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
                     <span className="font-medium text-primary-600">
                       約 {Math.round(house.price / house.area)}元/坪
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               ) : (
                 <div className="space-y-4 text-sm">
@@ -724,18 +762,16 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
                   </div>
                 </div>
               )}
-              <a
-                href={
-                  house.listing_type === '出租'
-                    ? 'https://rent.591.com.tw/tools/calculator'
-                    : 'https://www.megabank.com.tw/personal/loan/mortgage-calculation'
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full mt-4 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition duration-200 text-sm block text-center"
-              >
-                詳細試算
-              </a>
+              {house.listing_type !== '出租' && (
+                <a
+                  href={`https://www.megabank.com.tw/personal/loan/mortgage-calculation`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full mt-4 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition duration-200 text-sm block text-center"
+                >
+                  詳細試算
+                </a>
+              )}
             </div>
 
             {/* 返回按鈕 */}

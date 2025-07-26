@@ -13,7 +13,19 @@ export interface BaseHouseData {
   total_floor: string
   current_floor: string
   age: string // 日期格式 YYYY-MM-DD 或 ISO 格式
-  house_type: '公寓' | '透天' | '別墅'
+  house_type:
+    | '廠房'
+    | '土地'
+    | '廠辦'
+    | '農舍'
+    | '店面'
+    | '透天別墅'
+    | '辦公大樓'
+    | '套房'
+    | '華廈'
+    | '公寓'
+    | '電梯大樓'
+    | '其它'
   listing_type: '販售' | '出租'
   description: string
   introduction: string
@@ -28,7 +40,7 @@ export interface BaseHouseData {
     | '豪華裝潢'
     | '頂級豪華裝潢'
     | '復古裝潢'
-  unit: '公寓' | '社區' | '華夏' | '獨棟' | '整戶' | '套房' | '透天' | '別墅'
+  unit: '公寓' | '社區' | '華廈' | '獨棟' | '整戶' | '套房' | '透天' | '別墅'
   // 周邊機能欄位
   schools: string[]
   commercial_areas: string[]
@@ -67,7 +79,20 @@ export interface PublishFormData {
   total_floor: string
   current_floor: string
   age: string // 日期格式 YYYY-MM-DD
-  house_type: '公寓' | '透天' | '別墅'
+  house_type:
+    | '請選擇'
+    | '廠房'
+    | '土地'
+    | '廠辦'
+    | '農舍'
+    | '店面'
+    | '透天別墅'
+    | '辦公大樓'
+    | '套房'
+    | '華廈'
+    | '公寓'
+    | '電梯大樓'
+    | '其它'
   listing_type: '販售' | '出租'
   description: string
   introduction: string
@@ -76,7 +101,7 @@ export interface PublishFormData {
   management_fee: number
   parking_space: '平面式' | '機械式' | '無'
   decoration: '簡單裝潢' | '精裝裝潢' | '新裝潢' | '豪華裝潢' | '頂級豪華裝潢'
-  unit: '公寓' | '社區' | '華夏' | '獨棟'
+  unit: '公寓' | '社區' | '華廈' | '獨棟'
   // 周邊機能欄位
   schools: string[]
   commercial_areas: string[]

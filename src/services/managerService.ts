@@ -13,6 +13,7 @@ export interface AdminUser {
   department: string | null
   created: string
   updated: string
+  active?: boolean // 可選，兼容後端未提供
 }
 
 // 新增使用者的資料型別 (對應 /service/user/register)
@@ -47,6 +48,7 @@ export interface SiteSettings {
   gradientMain: string
   gradientMid: string
   gradientSub: string
+  gradientHorizontal: boolean
   lineUrl: string
   whatsappUrl: string
 }
@@ -175,20 +177,25 @@ export const managerService = {
       return acc
     }, {} as Record<string, string>)
 
-    // 解析漸層顏色
-    const gradientColors = settingsMap.web_color_gradient?.split(',') || [
+    // 解析漸層顏色與橫向布林值
+    const gradientArr = settingsMap.web_color_gradient?.split(',') || [
       '#EA5234',
       '#3A506B',
       '#1F2937',
+      'false',
     ]
+    const [gradientMain, gradientMid, gradientSub, gradientHorizontalRaw] =
+      gradientArr
+    const gradientHorizontal = gradientHorizontalRaw === 'true'
 
     return {
       title: settingsMap.web_title || '房屋網',
       logo: settingsMap.web_logo || '',
       primaryColor: settingsMap.web_color || '#EA5234',
-      gradientMain: gradientColors[0] || '#EA5234',
-      gradientMid: gradientColors[1] || '#3A506B',
-      gradientSub: gradientColors[2] || '#1F2937',
+      gradientMain: gradientMain || '#EA5234',
+      gradientMid: gradientMid || '#3A506B',
+      gradientSub: gradientSub || '#1F2937',
+      gradientHorizontal,
       lineUrl: settingsMap.line_url || '',
       whatsappUrl: settingsMap.whatsapp_url || '',
     }
@@ -253,9 +260,9 @@ export const managerService = {
       updates.push({ type: 'web_color', value: currentSettings.primaryColor })
     }
 
-    // 檢查漸層顏色是否有變更
-    const currentGradient = `${currentSettings.gradientMain},${currentSettings.gradientMid},${currentSettings.gradientSub}`
-    const originalGradient = `${originalSettings.gradientMain},${originalSettings.gradientMid},${originalSettings.gradientSub}`
+    // 檢查漸層顏色與方向是否有變更
+    const currentGradient = `${currentSettings.gradientMain},${currentSettings.gradientMid},${currentSettings.gradientSub},${currentSettings.gradientHorizontal}`
+    const originalGradient = `${originalSettings.gradientMain},${originalSettings.gradientMid},${originalSettings.gradientSub},${originalSettings.gradientHorizontal}`
 
     if (currentGradient !== originalGradient) {
       updates.push({ type: 'web_color_gradient', value: currentGradient })
